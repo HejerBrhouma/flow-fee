@@ -4,9 +4,12 @@ vich_uploader:
         expense_receipts:
             uri_prefix: /uploads/receipts
             upload_destination: '%kernel.project_dir%/public/uploads/receipts'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         user_avatars:
             uri_prefix: /uploads/avatars
             upload_destination: '%kernel.project_dir%/public/uploads/avatars'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
         company_logos:
             uri_prefix: /uploads/logos
             upload_destination: '%kernel.project_dir%/public/uploads/logos'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

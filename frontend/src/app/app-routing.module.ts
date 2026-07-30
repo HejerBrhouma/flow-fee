@@ -28,6 +28,14 @@ const routes: Routes = [
         loadChildren: () => import('./features/expenses/expenses.module').then(m => m.ExpensesModule),
       },
       {
+        path: 'budgets',
+        loadChildren: () => import('./features/budgets/budgets.module').then(m => m.BudgetsModule),
+      },
+      {
+        path: 'savings-goals',
+        loadChildren: () => import('./features/savings-goals/savings-goals.module').then(m => m.SavingsGoalsModule),
+      },
+      {
         path: 'company',
         loadChildren: () => import('./features/company/company.module').then(m => m.CompanyModule),
       },

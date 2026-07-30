@@ -10,9 +10,11 @@ export class ShellComponent {
   sidebarOpen = false;
 
   navItems = [
-    { label: 'Tableau de bord', icon: '📊', route: '/dashboard' },
-    { label: 'Mes dépenses',    icon: '💸', route: '/expenses' },
-    { label: 'Rapports',        icon: '📈', route: '/reports' },
+    { label: 'Tableau de bord',      icon: '📊', route: '/dashboard' },
+    { label: 'Mes dépenses',         icon: '💸', route: '/expenses' },
+    { label: 'Mon budget',           icon: '💰', route: '/budgets' },
+    { label: 'Objectifs d\'épargne', icon: '🎯', route: '/savings-goals' },
+    { label: 'Rapports',             icon: '📈', route: '/reports' },
   ];
 
   proNavItems = [

@@ -25,23 +25,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'expense:read', 'team:read'])]
+    #[Groups(['user:read', 'expense:read', 'team:read', 'budget:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    #[Groups(['user:read', 'expense:read'])]
+    #[Groups(['user:read', 'expense:read', 'budget:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
-    #[Groups(['user:read', 'expense:read', 'team:read'])]
+    #[Groups(['user:read', 'expense:read', 'team:read', 'budget:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank]
-    #[Groups(['user:read', 'expense:read', 'team:read'])]
+    #[Groups(['user:read', 'expense:read', 'team:read', 'budget:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column]

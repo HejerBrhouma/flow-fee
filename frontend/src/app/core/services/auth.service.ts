@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, LoginPayload, RegisterPayload, User } from '../models/user.model';
@@ -33,9 +33,13 @@ export class AuthService {
     );
   }
 
-  login(payload: LoginPayload): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login_check`, payload).pipe(
-      tap(response => this.handleAuthSuccess(response))
+  login(payload: LoginPayload): Observable<User> {
+    // login_check (handled natively by the JWT bundle) only ever returns { token },
+    // unlike /auth/register which returns { token, user } — so the user has to be
+    // fetched separately via /auth/me instead of trusting a "user" field that never comes back.
+    return this.http.post<{ token: string }>(`${environment.apiUrl}/auth/login_check`, payload).pipe(
+      tap(response => localStorage.setItem(this.TOKEN_KEY, response.token)),
+      switchMap(() => this.fetchCurrentUser()),
     );
   }
 
@@ -79,6 +83,13 @@ export class AuthService {
 
   private getStoredUser(): User | null {
     const stored = localStorage.getItem(this.USER_KEY);
-    return stored ? JSON.parse(stored) : null;
+    if (!stored) return null;
+
+    try {
+      return JSON.parse(stored);
+    } catch {
+      localStorage.removeItem(this.USER_KEY);
+      return null;
+    }
   }
 }

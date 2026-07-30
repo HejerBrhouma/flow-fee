@@ -31,14 +31,38 @@ export interface UserCompany {
   joinedAt: string;
 }
 
+export interface BudgetOwner {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+// Belongs either to a Department (company budget) or a User (personal budget), never both.
 export interface Budget {
   id: number;
-  department: Department;
+  department: Department | null;
+  user: BudgetOwner | null;
   amount: string;
   currency: string;
   period: 'monthly' | 'yearly';
   year: number;
+  month?: number | null;
+}
+
+export interface BudgetCreatePayload {
+  amount: number;
+  currency?: string;
+  period: 'monthly' | 'yearly';
+  year: number;
   month?: number;
+}
+
+export interface BudgetConsumption {
+  budget: Budget;
+  spent: number;
+  remaining: number;
+  percentage: number;
 }
 
 export interface DashboardStats {

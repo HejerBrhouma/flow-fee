@@ -1,9 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
 import { ExpenseService } from '../../../core/services/expense.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Expense, ExpenseStatus } from '../../../core/models/expense.model';
+import { Expense, ExpenseReceipt, ExpenseStatus } from '../../../core/models/expense.model';
+
+const MAX_RECEIPT_SIZE = 10 * 1024 * 1024; // 10 MB, mirrors the backend limit
+const ALLOWED_RECEIPT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 @Component({
   selector: 'app-expense-detail',
@@ -13,6 +17,7 @@ export class ExpenseDetailComponent implements OnInit {
   expense: Expense | null = null;
   loading = true;
   reviewComment = '';
+  uploading = false;
 
   readonly statusLabels: Record<ExpenseStatus, string> = {
     draft: 'Brouillon',
@@ -57,6 +62,56 @@ export class ExpenseDetailComponent implements OnInit {
     this.expenseService.review(this.expense.id, { action: 'reject', comment: this.reviewComment }).subscribe({
       next: (e) => { this.expense = e; this.toastr.warning('Dépense rejetée.'); },
       error: () => this.toastr.error('Impossible de rejeter la dépense.'),
+    });
+  }
+
+  dropped(files: NgxFileDropEntry[]): void {
+    for (const droppedFile of files) {
+      if (!droppedFile.fileEntry.isFile) continue;
+
+      const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
+      fileEntry.file((file: File) => this.uploadReceipt(file));
+    }
+  }
+
+  uploadReceipt(file: File): void {
+    if (!this.expense) return;
+
+    if (!ALLOWED_RECEIPT_TYPES.includes(file.type)) {
+      this.toastr.error('Format non supporté (JPEG, PNG, WEBP ou PDF uniquement).');
+      return;
+    }
+    if (file.size > MAX_RECEIPT_SIZE) {
+      this.toastr.error('Le fichier dépasse la taille maximale de 10 Mo.');
+      return;
+    }
+
+    this.uploading = true;
+    this.expenseService.uploadReceipt(this.expense.id, file).subscribe({
+      next: (e) => {
+        this.expense = e;
+        this.uploading = false;
+        this.toastr.success('Justificatif ajouté.');
+      },
+      error: (err) => {
+        this.uploading = false;
+        this.toastr.error(err.error?.message ?? 'Impossible d\'ajouter ce justificatif.');
+      },
+    });
+  }
+
+  deleteReceipt(receipt: ExpenseReceipt): void {
+    if (!this.expense) return;
+    if (!confirm('Supprimer ce justificatif ?')) return;
+
+    this.expenseService.deleteReceipt(this.expense.id, receipt.id).subscribe({
+      next: () => {
+        if (this.expense) {
+          this.expense.receipts = this.expense.receipts.filter(r => r.id !== receipt.id);
+        }
+        this.toastr.success('Justificatif supprimé.');
+      },
+      error: () => this.toastr.error('Impossible de supprimer ce justificatif.'),
     });
   }
 }

@@ -1,0 +1,51 @@
+<div class="relative">
+  <button (click)="toggle()" type="button"
+    class="relative w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition">
+    <span class="text-lg">🔔</span>
+    @if (unreadCount > 0) {
+      <span
+        class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center leading-none">
+        {{ unreadCount > 9 ? '9+' : unreadCount }}
+      </span>
+    }
+  </button>
+
+  @if (open) {
+    <div class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+        <p class="font-semibold text-gray-800 text-sm">Notifications</p>
+        @if (unreadCount > 0) {
+          <button (click)="markAllRead($event)" type="button"
+            class="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+            Tout marquer comme lu
+          </button>
+        }
+      </div>
+
+      <div class="max-h-96 overflow-y-auto">
+        @if (loading) {
+          <p class="px-4 py-6 text-center text-sm text-gray-400">Chargement…</p>
+        } @else if (notifications.length === 0) {
+          <p class="px-4 py-6 text-center text-sm text-gray-400">Aucune notification.</p>
+        } @else {
+          @for (notification of notifications; track notification.id) {
+            <button (click)="select(notification)" type="button"
+              class="w-full flex items-start gap-3 px-4 py-3 text-left border-b border-gray-50 last:border-0 hover:bg-gray-50 transition"
+              [class.bg-indigo-50]="!notification.isRead">
+              <span class="text-lg shrink-0">{{ icons[notification.type] }}</span>
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm text-gray-700" [class.font-semibold]="!notification.isRead">
+                  {{ notification.message }}
+                </span>
+                <span class="block text-xs text-gray-400 mt-0.5">{{ timeAgo(notification.createdAt) }}</span>
+              </span>
+              @if (!notification.isRead) {
+                <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-1.5"></span>
+              }
+            </button>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

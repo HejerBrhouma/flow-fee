@@ -10,7 +10,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: BudgetRepository::class)]
 #[ORM\Table(name: 'budgets')]
-#[ORM\UniqueConstraint(columns: ['department_id', 'year', 'month'])]
+#[ORM\UniqueConstraint(name: 'uniq_budget_department_period', columns: ['department_id', 'year', 'month'])]
+#[ORM\UniqueConstraint(name: 'uniq_budget_user_period', columns: ['user_id', 'year', 'month'])]
 class Budget
 {
     public const PERIOD_MONTHLY = 'monthly';
@@ -22,10 +23,17 @@ class Budget
     #[Groups(['budget:read'])]
     private ?int $id = null;
 
+    // Set for a company department budget; null for a personal budget.
     #[ORM\ManyToOne(inversedBy: 'budgets')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     #[Groups(['budget:read'])]
     private ?Department $department = null;
+
+    // Set for a personal budget; null for a company department budget.
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(['budget:read'])]
+    private ?User $user = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotBlank]
@@ -54,6 +62,8 @@ class Budget
     public function getId(): ?int { return $this->id; }
     public function getDepartment(): ?Department { return $this->department; }
     public function setDepartment(?Department $department): static { $this->department = $department; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
     public function getAmount(): ?string { return $this->amount; }
     public function setAmount(string $amount): static { $this->amount = $amount; return $this; }
     public function getCurrency(): string { return $this->currency; }

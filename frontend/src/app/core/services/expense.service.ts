@@ -55,4 +55,8 @@ export class ExpenseService {
     formData.append('receipt', file);
     return this.http.post<Expense>(`${this.url}/${expenseId}/receipts`, formData);
   }
+
+  deleteReceipt(expenseId: number, receiptId: number): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${expenseId}/receipts/${receiptId}`);
+  }
 }

@@ -17,6 +17,7 @@ class Notification
     public const TYPE_EXPENSE_REJECTED = 'expense_rejected';
     public const TYPE_BUDGET_ALERT = 'budget_alert';
     public const TYPE_TEAM_INVITE = 'team_invite';
+    public const TYPE_SAVINGS_GOAL_REACHED = 'savings_goal_reached';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

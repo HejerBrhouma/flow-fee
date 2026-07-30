@@ -9,6 +9,7 @@ use App\Entity\UserCompany;
 use App\Repository\CompanyRepository;
 use App\Repository\UserCompanyRepository;
 use App\Repository\UserRepository;
+use App\Security\Voter\CompanyVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -77,6 +78,8 @@ class CompanyController extends AbstractController
     #[Route('/{id}', name: 'show', methods: ['GET'])]
     public function show(Company $company): JsonResponse
     {
+        $this->denyAccessUnlessGranted(CompanyVoter::MEMBER, $company);
+
         return $this->json(
             json_decode($this->serializer->serialize($company, 'json', ['groups' => ['company:read']]))
         );
@@ -85,6 +88,8 @@ class CompanyController extends AbstractController
     #[Route('/{id}/team', name: 'team', methods: ['GET'])]
     public function team(Company $company): JsonResponse
     {
+        $this->denyAccessUnlessGranted(CompanyVoter::MEMBER, $company);
+
         return $this->json(
             json_decode($this->serializer->serialize($company->getUserCompanies(), 'json', ['groups' => ['team:read']]))
         );
@@ -93,7 +98,7 @@ class CompanyController extends AbstractController
     #[Route('/{id}/invite', name: 'invite', methods: ['POST'])]
     public function invite(Company $company, Request $request): JsonResponse
     {
-        $this->denyAccessUnlessGranted('ROLE_COMPANY_ADMIN');
+        $this->denyAccessUnlessGranted(CompanyVoter::ADMIN, $company);
 
         $data = json_decode($request->getContent(), true);
         $email = $data['email'] ?? null;
@@ -120,6 +125,19 @@ class CompanyController extends AbstractController
 
         $invitedUser->setType(User::TYPE_PROFESSIONAL);
 
+        $mappedRole = match ($role) {
+            UserCompany::ROLE_ADMIN => 'ROLE_COMPANY_ADMIN',
+            UserCompany::ROLE_MANAGER => 'ROLE_MANAGER',
+            default => null,
+        };
+        if ($mappedRole !== null) {
+            $globalRoles = array_diff($invitedUser->getRoles(), ['ROLE_USER']);
+            if (!in_array($mappedRole, $globalRoles, true)) {
+                $globalRoles[] = $mappedRole;
+            }
+            $invitedUser->setRoles(array_values($globalRoles));
+        }
+
         $this->em->persist($userCompany);
         $this->em->flush();
 
@@ -132,7 +150,7 @@ class CompanyController extends AbstractController
     #[Route('/{id}/team/{memberId}', name: 'team_remove', methods: ['DELETE'])]
     public function removeMember(Company $company, int $memberId): JsonResponse
     {
-        $this->denyAccessUnlessGranted('ROLE_COMPANY_ADMIN');
+        $this->denyAccessUnlessGranted(CompanyVoter::ADMIN, $company);
 
         /** @var User $currentUser */
         $currentUser = $this->getUser();
@@ -159,6 +177,8 @@ class CompanyController extends AbstractController
     #[Route('/{id}/departments', name: 'departments', methods: ['GET'])]
     public function departments(Company $company): JsonResponse
     {
+        $this->denyAccessUnlessGranted(CompanyVoter::MEMBER, $company);
+
         return $this->json(
             json_decode($this->serializer->serialize($company->getDepartments(), 'json', ['groups' => ['department:read']]))
         );
@@ -167,7 +187,7 @@ class CompanyController extends AbstractController
     #[Route('/{id}/departments', name: 'department_create', methods: ['POST'])]
     public function createDepartment(Company $company, Request $request): JsonResponse
     {
-        $this->denyAccessUnlessGranted('ROLE_COMPANY_ADMIN');
+        $this->denyAccessUnlessGranted(CompanyVoter::ADMIN, $company);
 
         $data = json_decode($request->getContent(), true);
 
