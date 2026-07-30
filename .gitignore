@@ -1,0 +1,16 @@
+# Backend
+backend/.env.local
+backend/.env.*.local
+backend/var/
+backend/vendor/
+backend/public/uploads/
+backend/config/jwt/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# System
+.DS_Store
+*.log

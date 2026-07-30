@@ -1,0 +1,12 @@
+vich_uploader:
+    db_driver: orm
+    mappings:
+        expense_receipts:
+            uri_prefix: /uploads/receipts
+            upload_destination: '%kernel.project_dir%/public/uploads/receipts'
+        user_avatars:
+            uri_prefix: /uploads/avatars
+            upload_destination: '%kernel.project_dir%/public/uploads/avatars'
+        company_logos:
+            uri_prefix: /uploads/logos
+            upload_destination: '%kernel.project_dir%/public/uploads/logos'

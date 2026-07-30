@@ -1,0 +1,72 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
+
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-indigo-600">Flow Fee</h1>
+      <p class="text-gray-500 mt-2">Créer votre compte</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+
+      <!-- Account type -->
+      <div class="grid grid-cols-2 gap-3">
+        <label class="relative cursor-pointer">
+          <input type="radio" formControlName="type" value="personal" class="sr-only">
+          <div class="border-2 rounded-lg p-3 text-center transition"
+            [class.border-indigo-500]="form.get('type')?.value === 'personal'"
+            [class.border-gray-200]="form.get('type')?.value !== 'personal'">
+            <span class="text-lg">👤</span>
+            <p class="text-sm font-medium mt-1">Particulier</p>
+          </div>
+        </label>
+        <label class="relative cursor-pointer">
+          <input type="radio" formControlName="type" value="professional" class="sr-only">
+          <div class="border-2 rounded-lg p-3 text-center transition"
+            [class.border-indigo-500]="form.get('type')?.value === 'professional'"
+            [class.border-gray-200]="form.get('type')?.value !== 'professional'">
+            <span class="text-lg">🏢</span>
+            <p class="text-sm font-medium mt-1">Professionnel</p>
+          </div>
+        </label>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+          <input formControlName="firstName" type="text" placeholder="Jean"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+          <input formControlName="lastName" type="text" placeholder="Dupont"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input formControlName="email" type="email" placeholder="vous@exemple.com"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe</label>
+        <input formControlName="password" type="password" placeholder="Minimum 8 caractères"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        @if (form.get('password')?.errors?.['minlength'] && form.get('password')?.touched) {
+          <p class="text-red-500 text-xs mt-1">Minimum 8 caractères.</p>
+        }
+      </div>
+
+      <button type="submit" [disabled]="loading"
+        class="w-full bg-indigo-600 text-white rounded-lg px-4 py-2.5 font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+        {{ loading ? 'Création...' : 'Créer mon compte' }}
+      </button>
+    </form>
+
+    <p class="text-center text-sm text-gray-500 mt-6">
+      Déjà un compte ?
+      <a routerLink="/auth/login" class="text-indigo-600 font-medium hover:underline">Se connecter</a>
+    </p>
+  </div>
+</div>

@@ -1,0 +1,122 @@
+<div class="p-6 max-w-2xl mx-auto">
+
+  @if (loading) {
+    <div class="flex justify-center py-12">
+      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  }
+
+  @if (!loading && expense) {
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">{{ expense.title }}</h2>
+      <span class="px-3 py-1 rounded-full text-sm font-medium"
+        [class.bg-gray-100]="expense.status === 'draft'"
+        [class.bg-amber-100]="expense.status === 'submitted'"
+        [class.bg-green-100]="expense.status === 'approved'"
+        [class.bg-red-100]="expense.status === 'rejected'"
+        [class.text-gray-700]="expense.status === 'draft'"
+        [class.text-amber-700]="expense.status === 'submitted'"
+        [class.text-green-700]="expense.status === 'approved'"
+        [class.text-red-700]="expense.status === 'rejected'">
+        {{ statusLabels[expense.status] }}
+      </span>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+
+      <div class="flex justify-between">
+        <span class="text-gray-500 text-sm">Montant</span>
+        <span class="font-bold text-2xl text-indigo-600">
+          {{ expense.amount | number:'1.2-2' }} {{ expense.currency }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-500 text-sm">Date</span>
+        <span class="font-medium">{{ expense.expenseDate | date:'dd MMMM yyyy':'':'fr' }}</span>
+      </div>
+
+      @if (expense.category) {
+        <div class="flex justify-between">
+          <span class="text-gray-500 text-sm">Catégorie</span>
+          <span class="font-medium">{{ expense.category.name }}</span>
+        </div>
+      }
+
+      @if (expense.department) {
+        <div class="flex justify-between">
+          <span class="text-gray-500 text-sm">Département</span>
+          <span class="font-medium">{{ expense.department.name }}</span>
+        </div>
+      }
+
+      @if (expense.description) {
+        <div>
+          <p class="text-gray-500 text-sm mb-1">Description</p>
+          <p class="text-gray-700">{{ expense.description }}</p>
+        </div>
+      }
+
+      @if (expense.receipts.length > 0) {
+        <div>
+          <p class="text-gray-500 text-sm mb-2">Justificatifs</p>
+          <div class="flex flex-wrap gap-2">
+            @for (receipt of expense.receipts; track receipt.id) {
+              <a [href]="receipt.filePath" target="_blank"
+                class="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2 text-sm text-indigo-600 hover:bg-gray-50">
+                📎 {{ receipt.originalName ?? 'Fichier' }}
+              </a>
+            }
+          </div>
+        </div>
+      }
+
+      @if (expense.reviewedBy) {
+        <div class="border-t pt-4">
+          <p class="text-gray-500 text-sm mb-1">
+            Révisé par {{ expense.reviewedBy.fullName }} — {{ expense.reviewedAt | date:'dd/MM/yyyy' }}
+          </p>
+          @if (expense.reviewComment) {
+            <p class="text-gray-700 italic">"{{ expense.reviewComment }}"</p>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-6 space-y-4">
+
+      @if (expense.status === 'draft') {
+        <div class="flex gap-3">
+          <a [routerLink]="['/expenses', expense.id, 'edit']"
+            class="px-4 py-2.5 border border-indigo-600 text-indigo-600 rounded-lg text-sm font-medium hover:bg-indigo-50 transition">
+            Modifier
+          </a>
+          <button (click)="submit()"
+            class="px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
+            Soumettre pour validation
+          </button>
+        </div>
+      }
+
+      @if (expense.status === 'submitted' && authService.hasRole('ROLE_MANAGER')) {
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+          <p class="text-sm font-medium text-amber-800">Validation requise</p>
+          <textarea [(ngModel)]="reviewComment" placeholder="Commentaire (optionnel)..." rows="2"
+            class="w-full border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none">
+          </textarea>
+          <div class="flex gap-3">
+            <button (click)="approve()"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition">
+              Approuver
+            </button>
+            <button (click)="reject()"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition">
+              Rejeter
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

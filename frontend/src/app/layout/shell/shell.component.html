@@ -1,0 +1,84 @@
+<div class="flex h-screen bg-gray-50 overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="flex flex-col w-64 bg-white border-r border-gray-100 shrink-0"
+         [class.hidden]="false">
+
+    <!-- Logo -->
+    <div class="flex items-center gap-2 px-6 py-5 border-b border-gray-100">
+      <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+        <span class="text-white font-bold text-sm">FF</span>
+      </div>
+      <span class="font-bold text-gray-800 text-lg">Flow Fee</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+
+      @for (item of navItems; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="bg-indigo-50 text-indigo-600"
+          [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+          <span class="text-base">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+
+      @if (isPro()) {
+        <div class="pt-4 pb-1">
+          <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Entreprise</p>
+        </div>
+        @for (item of proNavItems; track item.route) {
+          <a [routerLink]="item.route" routerLinkActive="bg-indigo-50 text-indigo-600"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+            <span class="text-base">{{ item.icon }}</span>
+            {{ item.label }}
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- User card -->
+    <div class="p-3 border-t border-gray-100">
+      <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer group">
+        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm shrink-0">
+          {{ authService.currentUser?.firstName?.[0] }}{{ authService.currentUser?.lastName?.[0] }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-800 truncate">{{ authService.currentUser?.fullName }}</p>
+          <p class="text-xs text-gray-400 truncate">{{ authService.currentUser?.email }}</p>
+        </div>
+        <button (click)="logout()" title="Déconnexion"
+          class="text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 text-sm">
+          ⏻
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Top bar -->
+    <header class="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between shrink-0">
+      <div>
+        <!-- Breadcrumb or page title via outlet -->
+      </div>
+      <div class="flex items-center gap-3">
+        <a routerLink="/expenses/new"
+          class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
+          + Nouvelle dépense
+        </a>
+        <a routerLink="/profile"
+          class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm hover:bg-indigo-200 transition">
+          {{ authService.currentUser?.firstName?.[0] }}
+        </a>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
