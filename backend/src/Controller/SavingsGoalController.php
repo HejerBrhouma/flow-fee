@@ -50,6 +50,7 @@ class SavingsGoalController extends AbstractController
         $goal->setName($data['name'] ?? '');
         $goal->setTargetAmount((string) ($data['targetAmount'] ?? '0'));
         $goal->setCurrency($data['currency'] ?? 'EUR');
+        $goal->setTerm($data['term'] ?? SavingsGoal::TERM_SHORT);
 
         if (!empty($data['targetDate'])) {
             $goal->setTargetDate(new \DateTime($data['targetDate']));
@@ -98,6 +99,9 @@ class SavingsGoalController extends AbstractController
         }
         if (isset($data['currency'])) {
             $goal->setCurrency($data['currency']);
+        }
+        if (isset($data['term'])) {
+            $goal->setTerm($data['term']);
         }
         if (array_key_exists('targetDate', $data)) {
             $goal->setTargetDate($data['targetDate'] ? new \DateTime($data['targetDate']) : null);

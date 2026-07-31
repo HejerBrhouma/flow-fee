@@ -1,0 +1,53 @@
+<ion-header [translucent]="true">
+  <ion-buttons slot="start">
+    <ion-back-button defaultHref="/tabs/expenses"></ion-back-button>
+  </ion-buttons>
+  <ion-toolbar>
+    <ion-title>{{ isEdit ? 'Modifier la dépense' : 'Nouvelle dépense' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <ion-list lines="none">
+      <ion-item>
+        <ion-input label="Titre *" labelPlacement="stacked" placeholder="Ex: Déjeuner client"
+          formControlName="title"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input label="Montant *" labelPlacement="stacked" type="number" placeholder="0.00"
+          formControlName="amount"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-select label="Devise" labelPlacement="stacked" formControlName="currency">
+          <ion-select-option value="EUR">EUR €</ion-select-option>
+          <ion-select-option value="USD">USD $</ion-select-option>
+          <ion-select-option value="GBP">GBP £</ion-select-option>
+          <ion-select-option value="TND">TND د.ت</ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-label>Date de la dépense *</ion-label>
+        <ion-datetime-button datetime="expenseDate" slot="end"></ion-datetime-button>
+      </ion-item>
+
+      <ion-item>
+        <ion-textarea label="Description" labelPlacement="stacked" placeholder="Détails optionnels..." rows="3"
+          formControlName="description"></ion-textarea>
+      </ion-item>
+    </ion-list>
+
+    <ion-modal [keepContentsMounted]="true">
+      <ng-template>
+        <ion-datetime id="expenseDate" formControlName="expenseDate" presentation="date"></ion-datetime>
+      </ng-template>
+    </ion-modal>
+
+    <ion-button expand="block" type="submit" [disabled]="form.invalid || loading" class="ion-margin-top">
+      {{ loading ? 'Enregistrement...' : (isEdit ? 'Mettre à jour' : 'Créer') }}
+    </ion-button>
+  </form>
+</ion-content>

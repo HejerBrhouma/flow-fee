@@ -19,7 +19,7 @@
         <a [routerLink]="item.route" routerLinkActive="bg-indigo-50 text-indigo-600"
           [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
-          <span class="text-base">{{ item.icon }}</span>
+          <app-icon [name]="item.icon"></app-icon>
           {{ item.label }}
         </a>
       }
@@ -31,28 +31,16 @@
         @for (item of proNavItems; track item.route) {
           <a [routerLink]="item.route" routerLinkActive="bg-indigo-50 text-indigo-600"
             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
-            <span class="text-base">{{ item.icon }}</span>
+            <app-icon [name]="item.icon"></app-icon>
             {{ item.label }}
           </a>
         }
       }
     </nav>
 
-    <!-- User card -->
+    <!-- Account menu -->
     <div class="p-3 border-t border-gray-100">
-      <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 cursor-pointer group">
-        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm shrink-0">
-          {{ authService.currentUser?.firstName?.[0] }}{{ authService.currentUser?.lastName?.[0] }}
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-800 truncate">{{ authService.currentUser?.fullName }}</p>
-          <p class="text-xs text-gray-400 truncate">{{ authService.currentUser?.email }}</p>
-        </div>
-        <button (click)="logout()" title="Déconnexion"
-          class="text-gray-300 hover:text-red-500 transition opacity-0 group-hover:opacity-100 text-sm">
-          ⏻
-        </button>
-      </div>
+      <app-account-menu></app-account-menu>
     </div>
   </aside>
 

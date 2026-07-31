@@ -27,8 +27,14 @@ export class SavingsGoalsComponent implements OnInit {
       name: ['', Validators.required],
       targetAmount: [null, [Validators.required, Validators.min(1)]],
       targetDate: [''],
+      term: ['short', Validators.required],
     });
   }
+
+  readonly termLabels: Record<string, string> = {
+    short: 'Court terme',
+    long: 'Long terme',
+  };
 
   ngOnInit(): void {
     this.load();
@@ -45,8 +51,8 @@ export class SavingsGoalsComponent implements OnInit {
   create(): void {
     if (this.form.invalid) return;
 
-    const { name, targetAmount, targetDate } = this.form.value;
-    this.savingsGoalService.create({ name, targetAmount, targetDate: targetDate || undefined }).subscribe({
+    const { name, targetAmount, targetDate, term } = this.form.value;
+    this.savingsGoalService.create({ name, targetAmount, targetDate: targetDate || undefined, term }).subscribe({
       next: (goal) => {
         this.goals.unshift(goal);
         this.form.reset();

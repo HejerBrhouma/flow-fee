@@ -41,6 +41,14 @@ export class ExpenseDetailComponent implements OnInit {
     });
   }
 
+  /**
+   * Personal expenses have no manager to approve them, so their owner stays fully
+   * autonomous regardless of status. Only company expenses lock once submitted for review.
+   */
+  get canEdit(): boolean {
+    return !this.expense?.department || this.expense?.status === 'draft';
+  }
+
   submit(): void {
     if (!this.expense) return;
     this.expenseService.submit(this.expense.id).subscribe({

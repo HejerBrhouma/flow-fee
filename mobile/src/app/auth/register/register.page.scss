@@ -1,0 +1,29 @@
+.register-wrapper {
+  max-width: 400px;
+  margin: 24px auto 0;
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+ion-item {
+  --background: var(--ion-color-light);
+  --color: var(--ion-color-light-contrast);
+  --border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--ion-color-medium);
+
+  a {
+    color: var(--ion-color-primary);
+    font-weight: 500;
+    text-decoration: none;
+  }
+}

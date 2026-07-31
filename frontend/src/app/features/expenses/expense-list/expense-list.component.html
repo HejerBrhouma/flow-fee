@@ -83,7 +83,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-right space-x-2">
-                  @if (expense.status === 'draft') {
+                  @if (canEdit(expense)) {
                     <a [routerLink]="['/expenses', expense.id, 'edit']"
                       class="text-xs text-indigo-600 hover:underline">Modifier</a>
                     <button (click)="delete(expense)"

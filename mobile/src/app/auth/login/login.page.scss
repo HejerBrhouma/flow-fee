@@ -1,0 +1,83 @@
+.login-wrapper {
+  max-width: 400px;
+  margin: 10vh auto 0;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 32px;
+
+  .brand-badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 12px;
+    border-radius: 14px;
+    background: var(--ion-color-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin-top: 4px;
+  }
+}
+
+ion-item {
+  --background: var(--ion-color-light);
+  --color: var(--ion-color-light-contrast);
+  --border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--ion-color-medium);
+  margin: 20px 0 12px;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ion-color-light-shade);
+  }
+
+  span {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+}
+
+.facebook-btn {
+  --background: #1877F2;
+  --background-hover: #1465d8;
+  --color: #fff;
+}
+
+ion-button img[slot="start"] {
+  margin-right: 10px;
+}
+
+.switch-link {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--ion-color-medium);
+
+  a {
+    color: var(--ion-color-primary);
+    font-weight: 500;
+    text-decoration: none;
+  }
+}

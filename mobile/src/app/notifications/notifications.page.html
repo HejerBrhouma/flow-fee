@@ -1,0 +1,45 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Notifications</ion-title>
+    @if (unreadCount > 0) {
+      <ion-buttons slot="end">
+        <ion-button (click)="markAllRead()">Tout lire</ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (loading) {
+    <div class="ion-text-center ion-padding">
+      <ion-spinner></ion-spinner>
+    </div>
+  }
+
+  @if (!loading && notifications.length === 0) {
+    <div class="empty-state ion-text-center ion-padding">
+      <p>Aucune notification.</p>
+    </div>
+  }
+
+  @if (!loading) {
+    <ion-list>
+      @for (notification of notifications; track notification.id) {
+        <ion-item button (click)="select(notification)" [class.unread]="!notification.isRead">
+          <ion-icon [name]="icons[notification.type]" slot="start"></ion-icon>
+          <ion-label class="ion-text-wrap">
+            <p class="message" [class.font-semibold]="!notification.isRead">{{ notification.message }}</p>
+            <p class="time">{{ timeAgo(notification.createdAt) }}</p>
+          </ion-label>
+          @if (!notification.isRead) {
+            <ion-badge slot="end" color="primary"></ion-badge>
+          }
+        </ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Flow Fee</string>
+    <string name="title_activity_main">Flow Fee</string>
+    <string name="package_name">com.flowfee.app</string>
+    <string name="custom_url_scheme">com.flowfee.app</string>
+</resources>

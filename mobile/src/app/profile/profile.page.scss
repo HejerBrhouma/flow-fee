@@ -1,0 +1,29 @@
+.user-card {
+  text-align: center;
+  padding: 24px 0;
+
+  .avatar {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: var(--ion-color-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin: 2px 0 12px;
+  }
+}

@@ -38,10 +38,16 @@ export class LoginComponent {
   }
 
   loginWithGoogle(): void {
-    this.authService.loginWithGoogle();
+    this.authService.loginWithGoogle().subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => this.toastr.error('Authentification Google échouée.'),
+    });
   }
 
   loginWithFacebook(): void {
-    this.authService.loginWithFacebook();
+    this.authService.loginWithFacebook().subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => this.toastr.error('Authentification Facebook échouée.'),
+    });
   }
 }

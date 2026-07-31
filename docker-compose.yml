@@ -82,6 +82,19 @@ services:
     networks:
       - flow-fee-network
 
+  mobile:
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+    container_name: flow-fee-mobile
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./mobile:/app
+      - /app/node_modules
+    networks:
+      - flow-fee-network
+
 networks:
   flow-fee-network:
     driver: bridge

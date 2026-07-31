@@ -161,7 +161,7 @@ class ExpenseController extends AbstractController
     {
         $this->denyAccessUnlessGranted('edit', $expense);
 
-        if ($expense->getStatus() !== Expense::STATUS_DRAFT) {
+        if ($this->isLocked($expense)) {
             return $this->json(['message' => 'Seules les dépenses en brouillon peuvent être modifiées.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -396,7 +396,7 @@ class ExpenseController extends AbstractController
     {
         $this->denyAccessUnlessGranted('edit', $expense);
 
-        if ($expense->getStatus() !== Expense::STATUS_DRAFT) {
+        if ($this->isLocked($expense)) {
             return $this->json(['message' => 'Seules les dépenses en brouillon peuvent être supprimées.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -411,7 +411,7 @@ class ExpenseController extends AbstractController
     {
         $this->denyAccessUnlessGranted('edit', $expense);
 
-        if ($expense->getStatus() !== Expense::STATUS_DRAFT) {
+        if ($this->isLocked($expense)) {
             return $this->json(['message' => 'Les justificatifs ne peuvent être ajoutés que sur une dépense en brouillon.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -446,7 +446,7 @@ class ExpenseController extends AbstractController
     {
         $this->denyAccessUnlessGranted('edit', $expense);
 
-        if ($expense->getStatus() !== Expense::STATUS_DRAFT) {
+        if ($this->isLocked($expense)) {
             return $this->json(['message' => 'Les justificatifs ne peuvent être supprimés que sur une dépense en brouillon.'], Response::HTTP_FORBIDDEN);
         }
 
@@ -459,5 +459,14 @@ class ExpenseController extends AbstractController
         $this->em->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Personal expenses have no manager to approve them, so their owner stays fully
+     * autonomous regardless of status. Only company expenses lock once submitted for review.
+     */
+    private function isLocked(Expense $expense): bool
+    {
+        return $expense->getDepartment() !== null && $expense->getStatus() !== Expense::STATUS_DRAFT;
     }
 }

@@ -1,0 +1,102 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Tableau de bord</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="ion-padding">
+    <h2 class="greeting">Bonjour, {{ authService.currentUser?.firstName }} 👋</h2>
+
+    @if (loading) {
+      <div class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+      </div>
+    }
+
+    @if (!loading && stats) {
+      <div class="stats-grid">
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-icon primary"><ion-icon name="wallet-outline"></ion-icon></div>
+            <p class="stat-label">Ce mois</p>
+            <p class="stat-value">{{ stats.monthlyTotal | number:'1.2-2' }} €</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-icon secondary"><ion-icon name="trending-up-outline"></ion-icon></div>
+            <p class="stat-label">Cette année</p>
+            <p class="stat-value">{{ stats.yearlyTotal | number:'1.2-2' }} €</p>
+          </ion-card-content>
+        </ion-card>
+
+        <ion-card class="stat-card">
+          <ion-card-content>
+            <div class="stat-icon" [class.warning]="stats.pendingCount > 0" [class.secondary]="stats.pendingCount === 0">
+              <ion-icon name="time-outline"></ion-icon>
+            </div>
+            <p class="stat-label">En attente</p>
+            <p class="stat-value">{{ stats.pendingCount }}</p>
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Tendance mensuelle</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (stats.monthlyTrend.length === 0) {
+            <div class="empty-state">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <p class="empty">Aucune dépense cette année.</p>
+            </div>
+          } @else {
+            <div class="trend-chart">
+              @for (m of stats.monthlyTrend; track m.month) {
+                <div class="trend-bar-wrapper">
+                  <div class="trend-bar" [style.height.%]="(m.total / maxTrendTotal()) * 100"></div>
+                  <span class="trend-label">{{ monthLabels[m.month - 1] }}</span>
+                </div>
+              }
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Par catégorie</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (stats.monthlyByCategory.length === 0) {
+            <div class="empty-state">
+              <ion-icon name="pie-chart-outline"></ion-icon>
+              <p class="empty">Aucune dépense ce mois-ci.</p>
+            </div>
+          } @else {
+            @for (cat of stats.monthlyByCategory; track cat.name) {
+              <div class="category-row">
+                <div class="category-info">
+                  <span class="category-dot" [style.background]="cat.color ?? '#6366f1'"></span>
+                  <span>{{ cat.icon }} {{ cat.name ?? 'Autre' }}</span>
+                </div>
+                <span class="category-total">{{ cat.total | number:'1.2-2' }} €</span>
+              </div>
+              <div class="category-bar-track">
+                <div class="category-bar" [style.width.%]="(cat.total / maxCategoryTotal()) * 100"
+                  [style.background]="cat.color ?? '#6366f1'"></div>
+              </div>
+            }
+          }
+        </ion-card-content>
+      </ion-card>
+    }
+  </div>
+</ion-content>

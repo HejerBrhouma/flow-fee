@@ -18,12 +18,12 @@ class Department
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['department:read', 'expense:read', 'company:read', 'budget:read'])]
+    #[Groups(['department:read', 'expense:read', 'company:read', 'budget:read', 'team:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Groups(['department:read', 'expense:read', 'company:read', 'budget:read'])]
+    #[Groups(['department:read', 'expense:read', 'company:read', 'budget:read', 'team:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

@@ -13,6 +13,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 class SavingsGoal
 {
+    public const TERM_SHORT = 'short';
+    public const TERM_LONG = 'long';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -47,6 +50,12 @@ class SavingsGoal
     #[Groups(['savings_goal:read'])]
     private ?\DateTimeInterface $targetDate = null;
 
+    // Short-term goals (holiday, gadget...) vs long-term ones (house, car...).
+    #[ORM\Column(length: 10, options: ['default' => self::TERM_SHORT])]
+    #[Assert\Choice(choices: [self::TERM_SHORT, self::TERM_LONG])]
+    #[Groups(['savings_goal:read'])]
+    private string $term = self::TERM_SHORT;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['savings_goal:read'])]
     private ?\DateTimeInterface $createdAt = null;
@@ -80,6 +89,8 @@ class SavingsGoal
     public function setCurrency(string $currency): static { $this->currency = $currency; return $this; }
     public function getTargetDate(): ?\DateTimeInterface { return $this->targetDate; }
     public function setTargetDate(?\DateTimeInterface $date): static { $this->targetDate = $date; return $this; }
+    public function getTerm(): string { return $this->term; }
+    public function setTerm(string $term): static { $this->term = $term; return $this; }
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
     public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
 }

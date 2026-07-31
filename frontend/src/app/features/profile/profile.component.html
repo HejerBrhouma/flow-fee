@@ -1,38 +1,164 @@
-<div class="p-6 max-w-lg mx-auto">
-  <h2 class="text-2xl font-bold text-gray-800 mb-6">Mon profil</h2>
+<div class="p-6 max-w-lg mx-auto space-y-6">
+  <h2 class="text-2xl font-bold text-gray-800">Mon compte</h2>
 
   @if (authService.currentUser; as user) {
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
 
+    <!-- Identity + avatar -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <div class="flex items-center gap-4">
-        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl">
-          {{ user.firstName[0] }}{{ user.lastName[0] }}
+        <div class="relative shrink-0">
+          @if (user.avatarUrl) {
+            <img [src]="user.avatarUrl" alt=""
+              class="w-16 h-16 rounded-full object-cover">
+          } @else {
+            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-xl">
+              {{ user.firstName[0] }}{{ user.lastName[0] }}
+            </div>
+          }
+          @if (uploadingAvatar) {
+            <div class="absolute inset-0 bg-white/70 rounded-full flex items-center justify-center">
+              <div class="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          }
         </div>
-        <div>
-          <p class="text-xl font-semibold text-gray-800">{{ user.fullName }}</p>
-          <p class="text-sm text-gray-500">{{ user.email }}</p>
+        <div class="min-w-0">
+          <p class="text-xl font-semibold text-gray-800 truncate">{{ user.fullName }}</p>
+          <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
+          <div class="flex items-center gap-3 mt-2">
+            <label class="text-xs font-medium text-indigo-600 hover:underline cursor-pointer">
+              Changer la photo
+              <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" (change)="onAvatarSelected($event)">
+            </label>
+            @if (user.avatarUrl) {
+              <button (click)="removeAvatar()" class="text-xs font-medium text-red-500 hover:underline">
+                Supprimer
+              </button>
+            }
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="border-t pt-4 space-y-2">
-        <div class="flex justify-between">
-          <span class="text-gray-500 text-sm">Type de compte</span>
-          <span class="font-medium text-sm capitalize">
-            {{ user.type === 'personal' ? 'Particulier' : 'Professionnel' }}
-          </span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-gray-500 text-sm">Membre depuis</span>
-          <span class="font-medium text-sm">{{ user.createdAt | date:'MMMM yyyy':'':'fr' }}</span>
-        </div>
-      </div>
+    <!-- Personal info + preferences -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4">Informations personnelles</h3>
 
-      <div class="border-t pt-4">
-        <button (click)="authService.logout()"
-          class="w-full border border-red-300 text-red-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-red-50 transition">
-          Se déconnecter
+      @if (!editing) {
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">Type de compte</span>
+            <span class="font-medium text-sm capitalize">
+              {{ user.type === 'personal' ? 'Particulier' : 'Professionnel' }}
+            </span>
+          </div>
+          @if (user.phone) {
+            <div class="flex justify-between">
+              <span class="text-gray-500 text-sm">Téléphone</span>
+              <span class="font-medium text-sm">{{ user.phone }}</span>
+            </div>
+          }
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">Devise préférée</span>
+            <span class="font-medium text-sm">{{ user.preferredCurrency ?? 'EUR' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500 text-sm">Membre depuis</span>
+            <span class="font-medium text-sm">{{ user.createdAt | date:'MMMM yyyy':'':'fr' }}</span>
+          </div>
+        </div>
+
+        <button (click)="startEditing()"
+          class="w-full mt-4 bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
+          Modifier le profil
         </button>
-      </div>
+      } @else {
+        <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+            <input formControlName="firstName" type="text"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <input formControlName="lastName" type="text"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <input formControlName="phone" type="tel" placeholder="Optionnel"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Devise préférée</label>
+            <select formControlName="preferredCurrency"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              @for (c of currencies; track c.value) {
+                <option [value]="c.value">{{ c.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="flex gap-3">
+            <button type="submit" [disabled]="form.invalid || saving"
+              class="flex-1 bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+              {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+            <button type="button" (click)="cancelEditing()"
+              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition">
+              Annuler
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+
+    <!-- Security -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4">Sécurité</h3>
+
+      @if (!changingPassword) {
+        <button (click)="startChangingPassword()"
+          class="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition">
+          Changer le mot de passe
+        </button>
+      } @else {
+        <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe actuel</label>
+            <input formControlName="currentPassword" type="password"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
+            <input formControlName="newPassword" type="password"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-xs text-gray-400 mt-1">8 caractères minimum.</p>
+          </div>
+
+          <div class="flex gap-3">
+            <button type="submit" [disabled]="passwordForm.invalid || savingPassword"
+              class="flex-1 bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+              {{ savingPassword ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+            <button type="button" (click)="cancelChangingPassword()"
+              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition">
+              Annuler
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+
+    <!-- Session -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <button (click)="authService.logout()"
+        class="w-full border border-red-300 text-red-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-red-50 transition">
+        Se déconnecter
+      </button>
     </div>
   }
 </div>

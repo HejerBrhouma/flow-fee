@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginPayload, RegisterPayload, User } from '../models/user.model';
+import { AuthResponse, ChangePasswordPayload, LoginPayload, RegisterPayload, UpdateProfilePayload, User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -43,12 +43,48 @@ export class AuthService {
     );
   }
 
-  loginWithGoogle(): void {
-    window.location.href = `${environment.apiUrl}/auth/oauth/google`;
+  loginWithGoogle(): Observable<User> {
+    return this.loginWithPopup('google');
   }
 
-  loginWithFacebook(): void {
-    window.location.href = `${environment.apiUrl}/auth/oauth/facebook`;
+  loginWithFacebook(): Observable<User> {
+    return this.loginWithPopup('facebook');
+  }
+
+  /**
+   * Opens the OAuth flow in a popup so window.opener stays set — the backend's callback
+   * page posts the token back via window.postMessage and closes itself (see OAuthAuthenticator).
+   * A full-page redirect would break this, since there'd be no opener to post the message to.
+   */
+  private loginWithPopup(provider: 'google' | 'facebook'): Observable<User> {
+    return new Observable<User>(observer => {
+      const popup = window.open(
+        `${environment.apiUrl}/auth/oauth/${provider}`,
+        'flow-fee-oauth',
+        'width=500,height=650',
+      );
+
+      if (!popup) {
+        observer.error(new Error('popup_blocked'));
+        return;
+      }
+
+      const apiOrigin = new URL(environment.apiUrl).origin;
+
+      const handleMessage = (event: MessageEvent) => {
+        if (event.origin !== apiOrigin || !event.data?.token) return;
+
+        window.removeEventListener('message', handleMessage);
+        localStorage.setItem(this.TOKEN_KEY, event.data.token);
+
+        this.fetchCurrentUser().subscribe({
+          next: user => { observer.next(user); observer.complete(); },
+          error: err => observer.error(err),
+        });
+      };
+
+      window.addEventListener('message', handleMessage);
+    });
   }
 
   fetchCurrentUser(): Observable<User> {
@@ -58,6 +94,40 @@ export class AuthService {
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
       })
     );
+  }
+
+  updateProfile(payload: UpdateProfilePayload): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/auth/me`, payload).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      })
+    );
+  }
+
+  uploadAvatar(file: File): Observable<User> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    return this.http.post<User>(`${environment.apiUrl}/auth/me/avatar`, formData).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      })
+    );
+  }
+
+  deleteAvatar(): Observable<User> {
+    return this.http.delete<User>(`${environment.apiUrl}/auth/me/avatar`).pipe(
+      tap(user => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      })
+    );
+  }
+
+  changePassword(payload: ChangePasswordPayload): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/me/password`, payload);
   }
 
   logout(): void {

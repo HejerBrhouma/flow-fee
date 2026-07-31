@@ -11,6 +11,7 @@ use League\OAuth2\Client\Provider\FacebookUser;
 use League\OAuth2\Client\Provider\GoogleUser;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -21,6 +22,9 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class OAuthAuthenticator extends OAuth2Authenticator
 {
+    // Must match the custom URL scheme registered in the mobile app (Info.plist / AndroidManifest.xml)
+    private const MOBILE_APP_SCHEME = 'com.flowfee.app';
+
     public function __construct(
         private readonly ClientRegistry $clientRegistry,
         private readonly UserRepository $userRepository,
@@ -33,22 +37,25 @@ class OAuthAuthenticator extends OAuth2Authenticator
         return in_array($request->attributes->get('_route'), [
             'api_auth_oauth_check_google',
             'api_auth_oauth_check_facebook',
+            'api_auth_oauth_check_google_mobile',
+            'api_auth_oauth_check_facebook_mobile',
         ]);
     }
 
     public function authenticate(Request $request): Passport
     {
         $route = $request->attributes->get('_route');
-        $clientName = str_contains($route, 'google') ? 'google' : 'facebook';
+        $provider = str_contains($route, 'google') ? 'google' : 'facebook';
+        $clientName = str_contains($route, 'mobile') ? "{$provider}_mobile" : $provider;
         $client = $this->clientRegistry->getClient($clientName);
 
         $accessToken = $this->fetchAccessToken($client);
 
         return new SelfValidatingPassport(
-            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client, $clientName) {
+            new UserBadge($accessToken->getToken(), function () use ($accessToken, $client, $provider) {
                 $oauthUser = $client->fetchUserFromToken($accessToken);
 
-                if ($clientName === 'google') {
+                if ($provider === 'google') {
                     /** @var GoogleUser $oauthUser */
                     return $this->handleGoogleUser($oauthUser);
                 }
@@ -107,7 +114,16 @@ class OAuthAuthenticator extends OAuth2Authenticator
         $user = $token->getUser();
         $jwt = $this->jwtManager->create($user);
 
-        // Redirect to frontend with token in URL
+        $route = (string) $request->attributes->get('_route');
+
+        if (str_contains($route, 'mobile')) {
+            // The native app registers this custom URL scheme and catches the redirect
+            // via Capacitor's App.addListener('appUrlOpen', ...) to resume the session.
+            return new RedirectResponse(self::MOBILE_APP_SCHEME . '://oauth-callback?token=' . urlencode($jwt));
+        }
+
+        // Web flow: this response is only ever loaded inside the popup window opened by
+        // AuthService.loginWithGoogle()/loginWithFacebook(), so postMessage to the opener works.
         return new Response(
             "<script>window.opener.postMessage({token: '{$jwt}'}, '*'); window.close();</script>",
             Response::HTTP_OK,

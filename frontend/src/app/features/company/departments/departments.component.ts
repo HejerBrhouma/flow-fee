@@ -6,6 +6,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { CompanyService } from '../../../core/services/company.service';
 import { BudgetService } from '../../../core/services/budget.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { BudgetConsumption, Department } from '../../../core/models/company.model';
 
 @Component({
@@ -36,6 +37,7 @@ export class DepartmentsComponent implements OnInit {
     private budgetService: BudgetService,
     private fb: FormBuilder,
     private toastr: ToastrService,
+    public authService: AuthService,
   ) {
     this.form = this.fb.group({
       name: ['', Validators.required],

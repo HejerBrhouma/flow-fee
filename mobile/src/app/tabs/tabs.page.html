@@ -1,0 +1,28 @@
+<ion-tabs>
+
+  <ion-tab-bar slot="bottom">
+    <ion-tab-button tab="dashboard" href="/tabs/dashboard">
+      <ion-icon aria-hidden="true" name="stats-chart-outline"></ion-icon>
+      <ion-label>Tableau de bord</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="expenses" href="/tabs/expenses">
+      <ion-icon aria-hidden="true" name="wallet-outline"></ion-icon>
+      <ion-label>Dépenses</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="notifications" href="/tabs/notifications">
+      <ion-icon aria-hidden="true" name="notifications-outline"></ion-icon>
+      <ion-label>Notifications</ion-label>
+      @if (unreadCount > 0) {
+        <ion-badge color="danger">{{ unreadCount > 9 ? '9+' : unreadCount }}</ion-badge>
+      }
+    </ion-tab-button>
+
+    <ion-tab-button tab="profile" href="/tabs/profile">
+      <ion-icon aria-hidden="true" name="person-outline"></ion-icon>
+      <ion-label>Profil</ion-label>
+    </ion-tab-button>
+  </ion-tab-bar>
+
+</ion-tabs>

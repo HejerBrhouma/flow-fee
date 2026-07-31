@@ -8,15 +8,18 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Attribute as Vich;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\HasLifecycleCallbacks]
 #[UniqueEntity(fields: ['email'], message: 'Cette adresse email est déjà utilisée.')]
+#[Vich\Uploadable]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const TYPE_PERSONAL = 'personal';
@@ -31,7 +34,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    #[Groups(['user:read', 'expense:read', 'budget:read'])]
+    #[Groups(['user:read', 'expense:read', 'budget:read', 'team:read'])]
     private ?string $email = null;
 
     #[ORM\Column(length: 100)]
@@ -54,12 +57,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private string $type = self::TYPE_PERSONAL;
 
+    // External avatar URL from an OAuth provider (Google/Facebook). Superseded by a locally
+    // uploaded avatarFile when both are set — see AuthController::withAvatarUrl().
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read'])]
     private ?string $avatar = null;
 
+    #[Vich\UploadableField(mapping: 'user_avatars', fileNameProperty: 'avatarPath', size: 'avatarFileSize')]
+    private ?File $avatarFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $avatarPath = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $avatarFileSize = null;
+
+    // Populated by AuthController before serialization (resolved absolute URL, whichever
+    // avatar source applies).
+    #[Groups(['user:read'])]
+    private ?string $avatarUrl = null;
+
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['user:read'])]
     private ?string $phone = null;
+
+    #[ORM\Column(length: 3, nullable: true)]
+    #[Groups(['user:read'])]
+    private ?string $preferredCurrency = null;
 
     // OAuth
     #[ORM\Column(length: 255, nullable: true)]
@@ -152,8 +175,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getAvatar(): ?string { return $this->avatar; }
     public function setAvatar(?string $avatar): static { $this->avatar = $avatar; return $this; }
 
+    public function getAvatarFile(): ?File { return $this->avatarFile; }
+    public function setAvatarFile(?File $file): static { $this->avatarFile = $file; return $this; }
+
+    public function getAvatarPath(): ?string { return $this->avatarPath; }
+    public function setAvatarPath(?string $path): static { $this->avatarPath = $path; return $this; }
+
+    public function getAvatarUrl(): ?string { return $this->avatarUrl; }
+    public function setAvatarUrl(?string $url): static { $this->avatarUrl = $url; return $this; }
+
     public function getPhone(): ?string { return $this->phone; }
     public function setPhone(?string $phone): static { $this->phone = $phone; return $this; }
+
+    public function getPreferredCurrency(): ?string { return $this->preferredCurrency; }
+    public function setPreferredCurrency(?string $currency): static { $this->preferredCurrency = $currency; return $this; }
 
     public function getGoogleId(): ?string { return $this->googleId; }
     public function setGoogleId(?string $googleId): static { $this->googleId = $googleId; return $this; }

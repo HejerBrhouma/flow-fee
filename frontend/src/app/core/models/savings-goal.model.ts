@@ -1,3 +1,5 @@
+export type SavingsGoalTerm = 'short' | 'long';
+
 export interface SavingsGoal {
   id: number;
   name: string;
@@ -5,6 +7,7 @@ export interface SavingsGoal {
   currentAmount: string;
   currency: string;
   targetDate?: string | null;
+  term: SavingsGoalTerm;
   createdAt: string;
 }
 
@@ -13,4 +16,5 @@ export interface SavingsGoalCreatePayload {
   targetAmount: number;
   currency?: string;
   targetDate?: string;
+  term?: SavingsGoalTerm;
 }

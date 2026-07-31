@@ -1,0 +1,48 @@
+<ion-header [translucent]="true">
+  <ion-buttons slot="start">
+    <ion-back-button defaultHref="/auth/login"></ion-back-button>
+  </ion-buttons>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="register-wrapper">
+    <h1>Créer un compte</h1>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <ion-list lines="none">
+        <ion-item>
+          <ion-input label="Prénom" labelPlacement="stacked" formControlName="firstName"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Nom" labelPlacement="stacked" formControlName="lastName"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Email" labelPlacement="stacked" type="email" formControlName="email"
+            autocomplete="email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Mot de passe" labelPlacement="stacked" type="password" formControlName="password"
+            autocomplete="new-password" helperText="8 caractères minimum"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-select label="Profil" labelPlacement="stacked" formControlName="type">
+            <ion-select-option value="personal">Particulier</ion-select-option>
+            <ion-select-option value="professional">Professionnel</ion-select-option>
+          </ion-select>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" type="submit" [disabled]="form.invalid || loading" class="ion-margin-top">
+        {{ loading ? 'Création...' : 'Créer mon compte' }}
+      </ion-button>
+    </form>
+
+    <p class="switch-link">
+      Déjà un compte ? <a routerLink="/auth/login">Se connecter</a>
+    </p>
+  </div>
+</ion-content>

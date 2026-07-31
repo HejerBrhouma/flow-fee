@@ -11,6 +11,14 @@ frontend/node_modules/
 frontend/dist/
 frontend/.angular/
 
+# Mobile
+mobile/node_modules/
+mobile/www/
+mobile/.angular/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/ios/App/Pods/
+
 # System
 .DS_Store
 *.log

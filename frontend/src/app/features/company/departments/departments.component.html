@@ -2,13 +2,15 @@
 
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-2xl font-bold text-gray-800">Départements</h2>
-    <button (click)="showForm = !showForm"
-      class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
-      + Nouveau département
-    </button>
+    @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+      <button (click)="showForm = !showForm"
+        class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
+        + Nouveau département
+      </button>
+    }
   </div>
 
-  @if (showForm) {
+  @if (showForm && authService.hasRole('ROLE_COMPANY_ADMIN')) {
     <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5 mb-6">
       <form [formGroup]="form" (ngSubmit)="create()" class="space-y-3">
         <div class="grid grid-cols-2 gap-3">
@@ -76,7 +78,9 @@
                   <div class="mb-3">
                     <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
                       <span>{{ periodLabel(item) }}</span>
-                      <button (click)="deleteBudget(dept.id, item)" class="text-gray-300 hover:text-red-500">✕</button>
+                      @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+                        <button (click)="deleteBudget(dept.id, item)" class="text-gray-300 hover:text-red-500">✕</button>
+                      }
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-1.5 mb-1 overflow-hidden">
                       <div class="h-1.5 rounded-full" [class]="barColor(item.percentage)"
@@ -93,33 +97,35 @@
                   <p class="text-xs text-gray-400 mb-3">Aucun budget suivi pour ce département.</p>
                 }
 
-                <form [formGroup]="budgetForm" (ngSubmit)="createDeptBudget(dept)" class="space-y-2 mt-3">
-                  <div class="grid grid-cols-2 gap-2">
-                    <select formControlName="period"
-                      class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                      <option value="monthly">Mensuel</option>
-                      <option value="yearly">Annuel</option>
-                    </select>
-                    @if (budgetForm.value.period === 'monthly') {
-                      <select formControlName="month"
+                @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+                  <form [formGroup]="budgetForm" (ngSubmit)="createDeptBudget(dept)" class="space-y-2 mt-3">
+                    <div class="grid grid-cols-2 gap-2">
+                      <select formControlName="period"
                         class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        @for (m of months; track m; let i = $index) {
-                          <option [value]="i + 1">{{ m }}</option>
-                        }
+                        <option value="monthly">Mensuel</option>
+                        <option value="yearly">Annuel</option>
                       </select>
-                    }
-                  </div>
-                  <div class="grid grid-cols-2 gap-2">
-                    <input formControlName="year" type="number" placeholder="Année"
-                      class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <input formControlName="amount" type="number" placeholder="Montant (€)"
-                      class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  </div>
-                  <button type="submit" [disabled]="budgetForm.invalid"
-                    class="w-full bg-indigo-600 text-white rounded-lg py-1.5 text-xs font-medium hover:bg-indigo-700 transition disabled:opacity-50">
-                    + Ajouter un budget
-                  </button>
-                </form>
+                      @if (budgetForm.value.period === 'monthly') {
+                        <select formControlName="month"
+                          class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                          @for (m of months; track m; let i = $index) {
+                            <option [value]="i + 1">{{ m }}</option>
+                          }
+                        </select>
+                      }
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                      <input formControlName="year" type="number" placeholder="Année"
+                        class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <input formControlName="amount" type="number" placeholder="Montant (€)"
+                        class="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <button type="submit" [disabled]="budgetForm.invalid"
+                      class="w-full bg-indigo-600 text-white rounded-lg py-1.5 text-xs font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+                      + Ajouter un budget
+                    </button>
+                  </form>
+                }
               }
             </div>
           }

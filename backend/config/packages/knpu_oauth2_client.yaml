@@ -7,10 +7,29 @@ knpu_oauth2_client:
             redirect_route: oauth_check_google
             redirect_params: {}
 
+        # Same Google app, but with its own redirect_uri so the callback can be told
+        # apart from the web flow and redirected back into the native app via deep link
+        # instead of the window.opener popup script. Register both redirect URIs in the
+        # Google Cloud Console (see README).
+        google_mobile:
+            type: google
+            client_id: '%env(GOOGLE_CLIENT_ID)%'
+            client_secret: '%env(GOOGLE_CLIENT_SECRET)%'
+            redirect_route: oauth_check_google_mobile
+            redirect_params: {}
+
         facebook:
             type: facebook
             client_id: '%env(FACEBOOK_CLIENT_ID)%'
             client_secret: '%env(FACEBOOK_CLIENT_SECRET)%'
             redirect_route: oauth_check_facebook
+            redirect_params: {}
+            graph_api_version: v18.0
+
+        facebook_mobile:
+            type: facebook
+            client_id: '%env(FACEBOOK_CLIENT_ID)%'
+            client_secret: '%env(FACEBOOK_CLIENT_SECRET)%'
+            redirect_route: oauth_check_facebook_mobile
             redirect_params: {}
             graph_api_version: v18.0

@@ -2,13 +2,15 @@
 
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-2xl font-bold text-gray-800">Équipe</h2>
-    <button (click)="showInviteForm = !showInviteForm"
-      class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
-      + Inviter un membre
-    </button>
+    @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+      <button (click)="showInviteForm = !showInviteForm"
+        class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
+        + Inviter un membre
+      </button>
+    }
   </div>
 
-  @if (showInviteForm) {
+  @if (showInviteForm && authService.hasRole('ROLE_COMPANY_ADMIN')) {
     <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5 mb-6">
       <h3 class="font-medium text-indigo-800 mb-4">Inviter un collaborateur</h3>
       <form [formGroup]="inviteForm" (ngSubmit)="invite()" class="flex flex-wrap gap-3">

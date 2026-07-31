@@ -1,0 +1,57 @@
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-wrapper">
+    <div class="brand">
+      <div class="brand-badge">FF</div>
+      <h1>Flow Fee</h1>
+      <p>Connectez-vous à votre compte</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <ion-list lines="none">
+        <ion-item>
+          <ion-input
+            label="Email"
+            labelPlacement="stacked"
+            type="email"
+            placeholder="vous@exemple.com"
+            formControlName="email"
+            autocomplete="email"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Mot de passe"
+            labelPlacement="stacked"
+            type="password"
+            placeholder="••••••••"
+            formControlName="password"
+            autocomplete="current-password"
+          ></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" type="submit" [disabled]="form.invalid || loading" class="ion-margin-top">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </ion-button>
+    </form>
+
+    <div class="oauth-divider">
+      <span>ou</span>
+    </div>
+
+    <ion-button expand="block" fill="outline" color="medium" (click)="loginWithGoogle()">
+      <img src="assets/icons/google.svg" alt="" slot="start" width="18" height="18">
+      Continuer avec Google
+    </ion-button>
+
+    <ion-button expand="block" fill="solid" (click)="loginWithFacebook()" class="ion-margin-top facebook-btn">
+      <img src="assets/icons/facebook.svg" alt="" slot="start" width="18" height="18">
+      Continuer avec Facebook
+    </ion-button>
+
+    <p class="switch-link">
+      Pas encore de compte ? <a routerLink="/auth/register">S'inscrire</a>
+    </p>
+  </div>
+</ion-content>

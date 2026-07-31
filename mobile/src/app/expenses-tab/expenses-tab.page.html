@@ -1,0 +1,81 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Dépenses</ion-title>
+  </ion-toolbar>
+  <ion-toolbar>
+    <form [formGroup]="filterForm">
+      <ion-segment formControlName="status" (ionChange)="applyFilters()">
+        <ion-segment-button value="">
+          <ion-label>Toutes</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="draft">
+          <ion-label>Brouillon</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="submitted">
+          <ion-label>En attente</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="approved">
+          <ion-label>Approuvée</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </form>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="load($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (loading) {
+    <div class="ion-text-center ion-padding">
+      <ion-spinner></ion-spinner>
+    </div>
+  }
+
+  @if (!loading && expenses.length === 0) {
+    <div class="empty-state ion-text-center ion-padding">
+      <ion-icon name="receipt-outline"></ion-icon>
+      <p>Aucune dépense pour le moment.</p>
+      <ion-button size="small" fill="outline" routerLink="/tabs/expenses/new">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Ajouter une dépense
+      </ion-button>
+    </div>
+  }
+
+  @if (!loading) {
+    <ion-list>
+      @for (expense of expenses; track expense.id) {
+        <ion-item-sliding>
+          <ion-item [routerLink]="['/tabs/expenses', expense.id]" button detail="true">
+            <ion-label>
+              <h2>{{ expense.title }}</h2>
+              <p>{{ expense.expenseDate | date:'dd MMM yyyy':'':'fr' }}</p>
+            </ion-label>
+            <ion-note slot="end" class="amount">{{ expense.amount | number:'1.2-2' }} {{ expense.currency }}</ion-note>
+            <ion-badge slot="end" [color]="statusColors[expense.status]">{{ statusLabels[expense.status] }}</ion-badge>
+          </ion-item>
+
+          @if (canEdit(expense)) {
+            <ion-item-options side="end">
+              <ion-item-option color="danger" (click)="delete(expense, $event)">
+                Supprimer
+              </ion-item-option>
+            </ion-item-options>
+          }
+        </ion-item-sliding>
+      }
+    </ion-list>
+
+    <ion-infinite-scroll (ionInfinite)="loadMore($event)">
+      <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  }
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button routerLink="/tabs/expenses/new">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

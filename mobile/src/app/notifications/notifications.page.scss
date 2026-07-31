@@ -1,0 +1,30 @@
+.empty-state {
+  color: var(--ion-color-medium);
+  margin-top: 40px;
+}
+
+ion-item.unread {
+  --background: rgba(var(--ion-color-primary-rgb), 0.06);
+}
+
+.message {
+  margin: 0;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.time {
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  margin: 2px 0 0;
+}
+
+ion-badge[slot="end"] {
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  border-radius: 50%;
+  padding: 0;
+}

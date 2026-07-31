@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { IconName } from '../icon/icon.component';
 
 @Component({
   selector: 'app-shell',
@@ -9,24 +9,20 @@ import { AuthService } from '../../core/services/auth.service';
 export class ShellComponent {
   sidebarOpen = false;
 
-  navItems = [
-    { label: 'Tableau de bord',      icon: '📊', route: '/dashboard' },
-    { label: 'Mes dépenses',         icon: '💸', route: '/expenses' },
-    { label: 'Mon budget',           icon: '💰', route: '/budgets' },
-    { label: 'Objectifs d\'épargne', icon: '🎯', route: '/savings-goals' },
-    { label: 'Rapports',             icon: '📈', route: '/reports' },
+  navItems: { label: string; icon: IconName; route: string }[] = [
+    { label: 'Tableau de bord',      icon: 'dashboard', route: '/dashboard' },
+    { label: 'Mes dépenses',         icon: 'expenses',  route: '/expenses' },
+    { label: 'Mon budget',           icon: 'budget',    route: '/budgets' },
+    { label: 'Objectifs d\'épargne', icon: 'savings',   route: '/savings-goals' },
+    { label: 'Rapports',             icon: 'reports',   route: '/reports' },
   ];
 
-  proNavItems = [
-    { label: 'Mon équipe',      icon: '👥', route: '/company/1/team' },
-    { label: 'Départements',    icon: '🏢', route: '/company/1/departments' },
+  proNavItems: { label: string; icon: IconName; route: string }[] = [
+    { label: 'Mon équipe',      icon: 'team',        route: '/company/1/team' },
+    { label: 'Départements',    icon: 'departments', route: '/company/1/departments' },
   ];
 
-  constructor(public authService: AuthService, private router: Router) {}
-
-  logout(): void {
-    this.authService.logout();
-  }
+  constructor(public authService: AuthService) {}
 
   isPro(): boolean {
     return this.authService.isProfessional();

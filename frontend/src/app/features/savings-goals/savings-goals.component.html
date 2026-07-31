@@ -11,13 +11,18 @@
   @if (showForm) {
     <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5 mb-6">
       <form [formGroup]="form" (ngSubmit)="create()" class="space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <input formControlName="name" type="text" placeholder="Ex : Achat voiture *"
             class="border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
           <input formControlName="targetAmount" type="number" placeholder="Montant cible (€) *"
             class="border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
           <input formControlName="targetDate" type="date"
             class="border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <select formControlName="term"
+            class="border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="short">Court terme</option>
+            <option value="long">Long terme</option>
+          </select>
         </div>
         <button type="submit" [disabled]="form.invalid"
           class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-50">
@@ -38,11 +43,16 @@
       @for (goal of goals; track goal.id) {
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
           <div class="flex items-start justify-between mb-3">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 min-w-0">
               @if (isReached(goal)) {
                 <span class="text-lg">🎯</span>
               }
-              <h3 class="font-semibold text-gray-800">{{ goal.name }}</h3>
+              <h3 class="font-semibold text-gray-800 truncate">{{ goal.name }}</h3>
+              <span class="shrink-0 px-2 py-0.5 rounded-full text-xs font-medium"
+                [class.bg-amber-100]="goal.term === 'short'" [class.text-amber-700]="goal.term === 'short'"
+                [class.bg-indigo-100]="goal.term === 'long'" [class.text-indigo-700]="goal.term === 'long'">
+                {{ termLabels[goal.term] }}
+              </span>
             </div>
             <button (click)="delete(goal)" title="Supprimer" class="text-gray-300 hover:text-red-500 transition text-sm">
               ✕

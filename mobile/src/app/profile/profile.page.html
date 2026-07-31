@@ -1,0 +1,27 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Profil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ion-padding">
+    <div class="user-card">
+      <div class="avatar">
+        {{ authService.currentUser?.firstName?.[0] }}{{ authService.currentUser?.lastName?.[0] }}
+      </div>
+      <h2>{{ authService.currentUser?.fullName }}</h2>
+      <p>{{ authService.currentUser?.email }}</p>
+      <ion-badge color="medium">
+        {{ authService.isProfessional() ? 'Compte professionnel' : 'Compte particulier' }}
+      </ion-badge>
+    </div>
+
+    <ion-list class="ion-margin-top" inset="true">
+      <ion-item button (click)="confirmLogout()" detail="false">
+        <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">Se déconnecter</ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+</ion-content>

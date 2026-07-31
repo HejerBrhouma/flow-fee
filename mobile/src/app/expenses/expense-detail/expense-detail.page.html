@@ -1,0 +1,130 @@
+<ion-header [translucent]="true">
+  <ion-buttons slot="start">
+    <ion-back-button defaultHref="/tabs/expenses"></ion-back-button>
+  </ion-buttons>
+  <ion-toolbar>
+    <ion-title>{{ expense?.title ?? 'Dépense' }}</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  @if (loading) {
+    <div class="ion-text-center ion-padding">
+      <ion-spinner></ion-spinner>
+    </div>
+  }
+
+  @if (!loading && expense) {
+    <div class="ion-padding">
+      <div class="status-row">
+        <ion-badge [color]="statusColors[expense.status]">{{ statusLabels[expense.status] }}</ion-badge>
+      </div>
+
+      <ion-card>
+        <ion-card-content>
+          <div class="detail-row">
+            <span class="detail-label">Montant</span>
+            <span class="detail-amount">{{ expense.amount | number:'1.2-2' }} {{ expense.currency }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Date</span>
+            <span>{{ expense.expenseDate | date:'dd MMMM yyyy':'':'fr' }}</span>
+          </div>
+          @if (expense.category) {
+            <div class="detail-row">
+              <span class="detail-label">Catégorie</span>
+              <span>{{ expense.category.name }}</span>
+            </div>
+          }
+          @if (expense.department) {
+            <div class="detail-row">
+              <span class="detail-label">Département</span>
+              <span>{{ expense.department.name }}</span>
+            </div>
+          }
+          @if (expense.description) {
+            <div class="detail-description">
+              <p class="detail-label">Description</p>
+              <p>{{ expense.description }}</p>
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Justificatifs</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (expense.receipts.length === 0) {
+            <p class="empty">Aucun justificatif.</p>
+          }
+
+          <ion-list lines="none">
+            @for (receipt of expense.receipts; track receipt.id) {
+              <ion-item>
+                <ion-icon name="document-attach-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <a [href]="receipt.filePath" target="_blank">{{ receipt.originalName ?? 'Fichier' }}</a>
+                </ion-label>
+                @if (canEdit) {
+                  <ion-button fill="clear" color="danger" slot="end" (click)="deleteReceipt(receipt)">
+                    <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                }
+              </ion-item>
+            }
+          </ion-list>
+
+          @if (canEdit) {
+            <ion-button expand="block" fill="outline" [disabled]="uploading" (click)="captureReceipt()">
+              <ion-icon name="camera-outline" slot="start"></ion-icon>
+              {{ uploading ? 'Envoi...' : 'Ajouter un justificatif' }}
+            </ion-button>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      @if (expense.reviewedBy) {
+        <ion-card>
+          <ion-card-content>
+            <p class="review-meta">
+              Révisé par {{ expense.reviewedBy.fullName }} — {{ expense.reviewedAt | date:'dd/MM/yyyy' }}
+            </p>
+            @if (expense.reviewComment) {
+              <p class="review-comment">"{{ expense.reviewComment }}"</p>
+            }
+          </ion-card-content>
+        </ion-card>
+      }
+
+      @if (canEdit) {
+        <div class="action-row">
+          <ion-button expand="block" fill="outline" [routerLink]="['/tabs/expenses', expense.id, 'edit']">
+            Modifier
+          </ion-button>
+          @if (expense.department && expense.status === 'draft') {
+            <ion-button expand="block" (click)="submit()">
+              Soumettre pour validation
+            </ion-button>
+          }
+        </div>
+      }
+
+      @if (expense.status === 'submitted' && authService.hasRole('ROLE_MANAGER')) {
+        <ion-card color="warning" class="review-card">
+          <ion-card-content>
+            <p class="review-title">Validation requise</p>
+            <ion-item lines="none" class="review-textarea">
+              <ion-textarea placeholder="Commentaire (optionnel)..." rows="2" [(ngModel)]="reviewComment"></ion-textarea>
+            </ion-item>
+            <div class="action-row">
+              <ion-button expand="block" color="success" (click)="approve()">Approuver</ion-button>
+              <ion-button expand="block" color="danger" (click)="reject()">Rejeter</ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+    </div>
+  }
+</ion-content>

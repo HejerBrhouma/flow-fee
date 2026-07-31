@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ExpenseService } from '../../../core/services/expense.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Expense } from '../../../core/models/expense.model';
 
 @Component({
@@ -21,11 +22,12 @@ export class ExpenseFormComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private toastr: ToastrService,
+    private authService: AuthService,
   ) {
     this.form = this.fb.group({
       title: ['', Validators.required],
       amount: ['', [Validators.required, Validators.min(0.01)]],
-      currency: ['EUR', Validators.required],
+      currency: [this.authService.currentUser?.preferredCurrency ?? 'EUR', Validators.required],
       expenseDate: ['', Validators.required],
       description: [''],
       categoryId: [null],
