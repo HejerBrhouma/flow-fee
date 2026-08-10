@@ -1,0 +1,45 @@
+{
+  "common": {
+    "language": "Language"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "expenses": "My expenses",
+    "budget": "My budget",
+    "savingsGoals": "Savings goals",
+    "reports": "Reports",
+    "team": "My team",
+    "departments": "Departments",
+    "newExpense": "+ New expense"
+  },
+  "accountMenu": {
+    "editProfile": "Edit my profile",
+    "logout": "Log out"
+  },
+  "login": {
+    "title": "Flow Fee",
+    "subtitle": "Sign in to your account",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithFacebook": "Continue with Facebook",
+    "or": "or",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "emailInvalid": "Invalid email.",
+    "password": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
+  },
+  "dashboard": {
+    "greeting": "Hello, {{name}}",
+    "monthlyExpenses": "This month's expenses",
+    "yearlyExpenses": "This year's expenses",
+    "pendingValidation": "Pending validation",
+    "addExpense": "Add an expense",
+    "new": "+ New",
+    "monthlyTrend": "Monthly trend",
+    "byCategory": "By category",
+    "noDataThisMonth": "No data this month"
+  }
+}

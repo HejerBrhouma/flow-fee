@@ -29,7 +29,7 @@ class UserCompany
 
     #[ORM\ManyToOne(inversedBy: 'userCompanies')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'team:read'])]
     private ?Company $company = null;
 
     #[ORM\ManyToOne(inversedBy: 'members')]

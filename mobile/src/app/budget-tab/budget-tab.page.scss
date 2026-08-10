@@ -1,0 +1,100 @@
+.finance-form {
+  background: var(--ion-color-light);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+
+  ion-item {
+    --background: transparent;
+    --padding-start: 0;
+  }
+}
+
+.finance-card {
+  margin: 0 0 12px;
+}
+
+.finance-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.goal-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.label-top {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ion-color-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 2px;
+}
+
+.label-amount {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.finance-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--ion-color-medium);
+  margin-top: 8px;
+}
+
+.danger-text {
+  color: var(--ion-color-danger);
+  font-weight: 600;
+}
+
+.warning-text {
+  color: var(--ion-color-warning-shade);
+  font-weight: 600;
+}
+
+.success-text {
+  color: var(--ion-color-success);
+  font-weight: 600;
+}
+
+.remaining-label {
+  font-size: 12px;
+  color: var(--ion-color-medium);
+  margin: 4px 0 0;
+}
+
+.contribute-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+
+  ion-input {
+    flex: 1;
+  }
+}
+
+.empty-state {
+  margin-top: 40px;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 40px;
+    opacity: 0.5;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin: 0;
+  }
+}

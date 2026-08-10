@@ -1,0 +1,99 @@
+.filter-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  ion-select {
+    flex: 1;
+    max-width: none;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 12px 0;
+  color: var(--ion-color-medium);
+
+  ion-icon {
+    font-size: 28px;
+    opacity: 0.5;
+    margin-bottom: 6px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+  }
+}
+
+.trend-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 140px;
+  gap: 4px;
+}
+
+.trend-bar-wrapper {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+
+.trend-bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--ion-color-primary);
+  border-radius: 3px 3px 0 0;
+}
+
+.trend-label {
+  font-size: 10px;
+  color: var(--ion-color-medium);
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 14px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.category-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.category-total {
+  font-weight: 600;
+}
+
+.category-bar-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ion-color-light);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.category-bar {
+  height: 100%;
+  border-radius: 2px;
+}

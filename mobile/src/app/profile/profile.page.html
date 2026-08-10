@@ -1,27 +1,159 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Profil</ion-title>
+    <ion-title>Mon compte</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <div class="ion-padding">
-    <div class="user-card">
-      <div class="avatar">
-        {{ authService.currentUser?.firstName?.[0] }}{{ authService.currentUser?.lastName?.[0] }}
-      </div>
-      <h2>{{ authService.currentUser?.fullName }}</h2>
-      <p>{{ authService.currentUser?.email }}</p>
-      <ion-badge color="medium">
-        {{ authService.isProfessional() ? 'Compte professionnel' : 'Compte particulier' }}
-      </ion-badge>
-    </div>
 
-    <ion-list class="ion-margin-top" inset="true">
-      <ion-item button (click)="confirmLogout()" detail="false">
-        <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
-        <ion-label color="danger">Se déconnecter</ion-label>
-      </ion-item>
-    </ion-list>
+    @if (authService.currentUser; as user) {
+
+      <!-- Identity + avatar -->
+      <div class="account-card ion-text-center">
+        <div class="avatar-wrapper">
+          @if (user.avatarUrl) {
+            <img [src]="user.avatarUrl" alt="" class="avatar-img">
+          } @else {
+            <div class="avatar-fallback">
+              {{ user.firstName[0] }}{{ user.lastName[0] }}
+            </div>
+          }
+          @if (uploadingAvatar) {
+            <div class="avatar-loading">
+              <ion-spinner></ion-spinner>
+            </div>
+          }
+        </div>
+
+        <h2>{{ user.fullName }}</h2>
+        <p class="email">{{ user.email }}</p>
+
+        <div class="avatar-actions">
+          <ion-button size="small" fill="clear" (click)="changeAvatar()">Changer la photo</ion-button>
+          @if (user.avatarUrl) {
+            <ion-button size="small" fill="clear" color="danger" (click)="removeAvatar()">Supprimer</ion-button>
+          }
+        </div>
+      </div>
+
+      <!-- Personal info -->
+      <div class="account-card">
+        <h3>Informations personnelles</h3>
+
+        @if (!editing) {
+          <ion-list lines="none" class="info-list">
+            <ion-item>
+              <ion-label>Type de compte</ion-label>
+              <ion-note slot="end">{{ authService.isProfessional() ? 'Professionnel' : 'Particulier' }}</ion-note>
+            </ion-item>
+            @if (user.phone) {
+              <ion-item>
+                <ion-label>Téléphone</ion-label>
+                <ion-note slot="end">{{ user.phone }}</ion-note>
+              </ion-item>
+            }
+            <ion-item>
+              <ion-label>Devise préférée</ion-label>
+              <ion-note slot="end">{{ user.preferredCurrency ?? 'EUR' }}</ion-note>
+            </ion-item>
+            <ion-item>
+              <ion-label>Membre depuis</ion-label>
+              <ion-note slot="end">{{ user.createdAt | date:'MMMM yyyy':'':'fr' }}</ion-note>
+            </ion-item>
+          </ion-list>
+
+          <ion-button expand="block" (click)="startEditing()">Modifier le profil</ion-button>
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="save()">
+            <ion-list lines="none">
+              <ion-item>
+                <ion-input label="Prénom" labelPlacement="stacked" formControlName="firstName"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input label="Nom" labelPlacement="stacked" formControlName="lastName"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input label="Téléphone" labelPlacement="stacked" type="tel" placeholder="Optionnel" formControlName="phone"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-select label="Devise préférée" labelPlacement="stacked" formControlName="preferredCurrency" interface="popover">
+                  @for (c of currencies; track c.value) {
+                    <ion-select-option [value]="c.value">{{ c.label }}</ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            </ion-list>
+
+            <div class="form-actions">
+              <ion-button type="submit" expand="block" [disabled]="form.invalid || saving">
+                {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+              </ion-button>
+              <ion-button expand="block" fill="outline" color="medium" (click)="cancelEditing()">Annuler</ion-button>
+            </div>
+          </form>
+        }
+      </div>
+
+      <!-- Security -->
+      <div class="account-card">
+        <h3>Sécurité</h3>
+
+        @if (!changingPassword) {
+          <ion-button expand="block" fill="outline" (click)="startChangingPassword()">
+            Changer le mot de passe
+          </ion-button>
+        } @else {
+          <form [formGroup]="passwordForm" (ngSubmit)="savePassword()">
+            <ion-list lines="none">
+              <ion-item>
+                <ion-input label="Mot de passe actuel" labelPlacement="stacked" type="password" formControlName="currentPassword"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-input label="Nouveau mot de passe" labelPlacement="stacked" type="password" formControlName="newPassword"></ion-input>
+              </ion-item>
+            </ion-list>
+            <p class="hint">8 caractères minimum.</p>
+
+            <div class="form-actions">
+              <ion-button type="submit" expand="block" [disabled]="passwordForm.invalid || savingPassword">
+                {{ savingPassword ? 'Enregistrement...' : 'Enregistrer' }}
+              </ion-button>
+              <ion-button expand="block" fill="outline" color="medium" (click)="cancelChangingPassword()">Annuler</ion-button>
+            </div>
+          </form>
+        }
+      </div>
+
+      <!-- Company -->
+      @if (!membershipLoading) {
+        <div class="account-card">
+          <h3>Entreprise</h3>
+
+          @if (membership?.company) {
+            <p class="company-name">{{ membership?.company?.name }}</p>
+            <ion-button expand="block" fill="outline" [routerLink]="['/tabs/profile/company', membership?.company?.id, 'team']">
+              Mon équipe
+            </ion-button>
+            <ion-button expand="block" fill="outline" class="ion-margin-top" [routerLink]="['/tabs/profile/company', membership?.company?.id, 'departments']">
+              Départements
+            </ion-button>
+          } @else {
+            <p class="hint">Vous n'appartenez à aucune entreprise pour l'instant.</p>
+            <ion-button expand="block" routerLink="/tabs/profile/company-setup">
+              Créer une entreprise
+            </ion-button>
+          }
+        </div>
+      }
+
+      <!-- Session -->
+      <ion-list class="ion-margin-top" inset="true">
+        <ion-item button (click)="confirmLogout()" detail="false">
+          <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
+          <ion-label color="danger">Se déconnecter</ion-label>
+        </ion-item>
+      </ion-list>
+    }
   </div>
 </ion-content>

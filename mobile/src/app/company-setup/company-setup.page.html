@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Créer une entreprise</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ion-padding">
+    <p class="intro">Configurez votre espace professionnel pour gérer une équipe, des départements et des budgets partagés.</p>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <ion-list lines="none">
+        <ion-item>
+          <ion-input label="Nom de l'entreprise *" labelPlacement="stacked" placeholder="Ma Société SAS" formControlName="name"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="SIRET" labelPlacement="stacked" placeholder="12345678901234" formControlName="siret"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Adresse" labelPlacement="stacked" formControlName="address"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Ville" labelPlacement="stacked" formControlName="city"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-input label="Code postal" labelPlacement="stacked" formControlName="zipCode"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <ion-button expand="block" type="submit" [disabled]="loading || form.invalid" class="ion-margin-top">
+        {{ loading ? 'Création...' : 'Créer l\'entreprise' }}
+      </ion-button>
+    </form>
+  </div>
+</ion-content>

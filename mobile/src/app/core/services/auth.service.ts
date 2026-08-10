@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Preferences } from '@capacitor/preferences';
 import { Browser } from '@capacitor/browser';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginPayload, RegisterPayload, User } from '../models/user.model';
+import { AuthResponse, ChangePasswordPayload, LoginPayload, RegisterPayload, UpdateProfilePayload, User } from '../models/user.model';
 
 const TOKEN_KEY = 'flow_fee_token';
 const USER_KEY = 'flow_fee_user';
@@ -98,6 +98,31 @@ export class AuthService {
     return this.http.get<User>(`${environment.apiUrl}/auth/me`).pipe(
       switchMap(user => this.persistUser(user)),
     );
+  }
+
+  updateProfile(payload: UpdateProfilePayload): Observable<User> {
+    return this.http.patch<User>(`${environment.apiUrl}/auth/me`, payload).pipe(
+      switchMap(user => this.persistUser(user)),
+    );
+  }
+
+  uploadAvatar(file: File): Observable<User> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    return this.http.post<User>(`${environment.apiUrl}/auth/me/avatar`, formData).pipe(
+      switchMap(user => this.persistUser(user)),
+    );
+  }
+
+  deleteAvatar(): Observable<User> {
+    return this.http.delete<User>(`${environment.apiUrl}/auth/me/avatar`).pipe(
+      switchMap(user => this.persistUser(user)),
+    );
+  }
+
+  changePassword(payload: ChangePasswordPayload): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/me/password`, payload);
   }
 
   logout(): void {

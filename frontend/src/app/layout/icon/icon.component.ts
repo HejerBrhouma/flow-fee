@@ -11,7 +11,8 @@ export type IconName =
   | 'logout'
   | 'settings'
   | 'profile'
-  | 'chevron';
+  | 'chevron'
+  | 'globe';
 
 @Component({
   selector: 'app-icon',

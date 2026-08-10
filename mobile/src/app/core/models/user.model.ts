@@ -7,9 +7,23 @@ export interface User {
   lastName: string;
   fullName: string;
   type: UserType;
-  avatar?: string;
+  avatarUrl?: string | null;
+  phone?: string;
+  preferredCurrency?: string | null;
   roles: string[];
   createdAt: string;
+}
+
+export interface UpdateProfilePayload {
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  preferredCurrency?: string;
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
 }
 
 export interface AuthResponse {

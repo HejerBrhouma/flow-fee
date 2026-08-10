@@ -165,6 +165,7 @@ class AuthController extends AbstractController
         }
 
         $user->setAvatarFile($uploadedFile);
+        $user->touch();
         $this->em->flush();
 
         return $this->json($this->serializeUser($user));
@@ -177,6 +178,7 @@ class AuthController extends AbstractController
         $user = $this->getUser();
 
         $user->setAvatarPath(null);
+        $user->touch();
         $this->em->flush();
 
         return $this->json($this->serializeUser($user));

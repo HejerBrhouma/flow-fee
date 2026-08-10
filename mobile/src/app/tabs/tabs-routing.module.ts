@@ -18,6 +18,10 @@ const routes: Routes = [
         loadChildren: () => import('../expenses-tab/expenses-tab.module').then(m => m.ExpensesTabPageModule),
       },
       {
+        path: 'budget',
+        loadChildren: () => import('../budget-tab/budget-tab.module').then(m => m.BudgetTabPageModule),
+      },
+      {
         path: 'notifications',
         loadChildren: () => import('../notifications/notifications.module').then(m => m.NotificationsPageModule),
       },

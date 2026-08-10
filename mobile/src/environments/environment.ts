@@ -2,12 +2,19 @@
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-// The API host follows whatever host the app itself was loaded from, so the same build
-// works for the browser preview (localhost:8100), a phone on the LAN (e.g. 192.168.x.x:8100)
-// and the iOS simulator, without editing this file every time the dev machine's IP changes.
-// This does NOT cover the Android emulator: its webview reports its own `localhost`, which
-// never reaches the host machine. Hardcode `apiHost = '10.0.2.2'` below when testing there.
-const apiHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+import { Capacitor } from '@capacitor/core';
+
+// A compiled native app's webview always reports its own bundled origin (e.g.
+// `capacitor://localhost`), never the phone's actual network address — so
+// window.location.hostname can't be used to reach the dev machine there. Hardcode the
+// Mac's current LAN IP for native builds instead; update it if the IP changes (check via
+// `ipconfig getifaddr en0` on macOS). Browser/LAN-via-URL testing (`ionic serve`) still
+// auto-detects via window.location.hostname, so this only matters for Xcode/Android Studio builds.
+const DEV_MACHINE_LAN_IP = '192.168.100.61';
+
+const apiHost = Capacitor.isNativePlatform()
+  ? DEV_MACHINE_LAN_IP
+  : (typeof window !== 'undefined' ? window.location.hostname : 'localhost');
 
 export const environment = {
   production: false,

@@ -1,0 +1,143 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Départements</ion-title>
+    @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+      <ion-buttons slot="end">
+        <ion-button (click)="showForm = !showForm">
+          <ion-icon slot="icon-only" [name]="showForm ? 'close' : 'add'"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ion-padding">
+
+    @if (showForm && authService.hasRole('ROLE_COMPANY_ADMIN')) {
+      <form [formGroup]="form" (ngSubmit)="create()" class="dept-form">
+        <ion-list lines="none">
+          <ion-item>
+            <ion-input label="Nom *" labelPlacement="stacked" formControlName="name"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input label="Description" labelPlacement="stacked" formControlName="description"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input label="Budget mensuel (€)" labelPlacement="stacked" type="number" formControlName="monthlyBudget"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input label="Budget annuel (€)" labelPlacement="stacked" type="number" formControlName="yearlyBudget"></ion-input>
+          </ion-item>
+        </ion-list>
+        <ion-button expand="block" type="submit" [disabled]="form.invalid" class="ion-margin-top">
+          Créer
+        </ion-button>
+      </form>
+    }
+
+    @if (loading) {
+      <div class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+      </div>
+    }
+
+    @if (!loading) {
+      @for (dept of departments; track dept.id) {
+        <ion-card class="dept-card">
+          <ion-card-content>
+            <p class="dept-name">{{ dept.name }}</p>
+            @if (dept.description) {
+              <p class="dept-desc">{{ dept.description }}</p>
+            }
+
+            @if (dept.monthlyBudget || dept.yearlyBudget) {
+              <div class="dept-budgets">
+                @if (dept.monthlyBudget) {
+                  <span>Mensuel : <strong>{{ dept.monthlyBudget | number:'1.2-2' }} €</strong></span>
+                }
+                @if (dept.yearlyBudget) {
+                  <span>Annuel : <strong>{{ dept.yearlyBudget | number:'1.2-2' }} €</strong></span>
+                }
+              </div>
+            }
+
+            <ion-button expand="block" fill="outline" size="small" (click)="toggleBudgets(dept)">
+              {{ expandedDeptId === dept.id ? 'Masquer le suivi budgétaire' : 'Suivi budgétaire' }}
+            </ion-button>
+
+            @if (expandedDeptId === dept.id) {
+              <div class="budget-tracking">
+                @if (budgetsLoading && !deptBudgets[dept.id]) {
+                  <div class="ion-text-center ion-padding">
+                    <ion-spinner></ion-spinner>
+                  </div>
+                } @else {
+                  @for (item of deptBudgets[dept.id]; track item.budget.id) {
+                    <div class="tracked-budget">
+                      <div class="tracked-header">
+                        <span>{{ periodLabel(item) }}</span>
+                        @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+                          <ion-icon name="trash-outline" (click)="confirmDeleteBudget(dept.id, item)"></ion-icon>
+                        }
+                      </div>
+                      <ion-progress-bar [value]="(item.percentage > 100 ? 100 : item.percentage) / 100"
+                        [color]="barColor(item.percentage)"></ion-progress-bar>
+                      <div class="tracked-footer">
+                        <span>{{ item.spent | number:'1.2-2' }} / {{ item.budget.amount | number:'1.2-2' }} {{ item.budget.currency }}</span>
+                        <span [class.danger-text]="item.percentage >= 100" [class.warning-text]="item.percentage >= 90 && item.percentage < 100">
+                          {{ item.percentage }}%
+                        </span>
+                      </div>
+                    </div>
+                  } @empty {
+                    <p class="no-budget">Aucun budget suivi pour ce département.</p>
+                  }
+
+                  @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+                    <form [formGroup]="budgetForm" (ngSubmit)="createDeptBudget(dept)" class="dept-budget-form">
+                      <ion-list lines="none">
+                        <ion-item>
+                          <ion-select label="Période" labelPlacement="stacked" formControlName="period" interface="popover">
+                            <ion-select-option value="monthly">Mensuel</ion-select-option>
+                            <ion-select-option value="yearly">Annuel</ion-select-option>
+                          </ion-select>
+                        </ion-item>
+                        @if (budgetForm.value.period === 'monthly') {
+                          <ion-item>
+                            <ion-select label="Mois" labelPlacement="stacked" formControlName="month" interface="popover">
+                              @for (m of months; track m; let i = $index) {
+                                <ion-select-option [value]="i + 1">{{ m }}</ion-select-option>
+                              }
+                            </ion-select>
+                          </ion-item>
+                        }
+                        <ion-item>
+                          <ion-input label="Année" labelPlacement="stacked" type="number" formControlName="year"></ion-input>
+                        </ion-item>
+                        <ion-item>
+                          <ion-input label="Montant (€)" labelPlacement="stacked" type="number" formControlName="amount"></ion-input>
+                        </ion-item>
+                      </ion-list>
+                      <ion-button expand="block" size="small" type="submit" [disabled]="budgetForm.invalid" class="ion-margin-top">
+                        + Ajouter un budget
+                      </ion-button>
+                    </form>
+                  }
+                }
+              </div>
+            }
+          </ion-card-content>
+        </ion-card>
+      } @empty {
+        <div class="empty-state ion-text-center ion-padding">
+          <ion-icon name="business-outline"></ion-icon>
+          <p>Aucun département créé.</p>
+        </div>
+      }
+    }
+  </div>
+</ion-content>

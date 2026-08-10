@@ -153,6 +153,17 @@
       }
     </div>
 
+    @if (!isProfessional()) {
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 class="text-sm font-semibold text-gray-800 mb-2">Entreprise</h3>
+        <p class="text-sm text-gray-500 mb-4">Vous n'appartenez à aucune entreprise pour l'instant.</p>
+        <a routerLink="/company/setup"
+          class="block text-center w-full bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
+          Créer une entreprise
+        </a>
+      </div>
+    }
+
     <!-- Session -->
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <button (click)="authService.logout()"

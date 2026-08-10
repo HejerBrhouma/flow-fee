@@ -1,0 +1,202 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Finances</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showForm = !showForm">
+        <ion-icon slot="icon-only" [name]="showForm ? 'close' : 'add'"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="segment" (ionChange)="changeSegment()">
+      <ion-segment-button value="budget">
+        <ion-label>Budget</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="savings">
+        <ion-label>Épargne</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="segment === 'budget' ? loadBudgets($event) : loadGoals($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="ion-padding">
+
+    <!-- ===== Budget ===== -->
+    @if (segment === 'budget') {
+
+      @if (showForm) {
+        <form [formGroup]="budgetForm" (ngSubmit)="createBudget()" class="finance-form">
+          <ion-list lines="none">
+            <ion-item>
+              <ion-select label="Période" labelPlacement="stacked" formControlName="period" interface="popover">
+                <ion-select-option value="monthly">Mensuel</ion-select-option>
+                <ion-select-option value="yearly">Annuel</ion-select-option>
+              </ion-select>
+            </ion-item>
+
+            @if (budgetForm.value.period === 'monthly') {
+              <ion-item>
+                <ion-select label="Mois" labelPlacement="stacked" formControlName="month" interface="popover">
+                  @for (m of months; track m; let i = $index) {
+                    <ion-select-option [value]="i + 1">{{ m }}</ion-select-option>
+                  }
+                </ion-select>
+              </ion-item>
+            }
+
+            <ion-item>
+              <ion-input label="Année" labelPlacement="stacked" type="number" formControlName="year"></ion-input>
+            </ion-item>
+
+            <ion-item>
+              <ion-input label="Montant (€) *" labelPlacement="stacked" type="number" formControlName="amount"></ion-input>
+            </ion-item>
+          </ion-list>
+
+          <ion-button expand="block" type="submit" [disabled]="budgetForm.invalid" class="ion-margin-top">
+            Créer
+          </ion-button>
+        </form>
+      }
+
+      @if (budgetsLoading) {
+        <div class="ion-text-center ion-padding">
+          <ion-spinner></ion-spinner>
+        </div>
+      }
+
+      @if (!budgetsLoading && budgets.length === 0) {
+        <div class="empty-state ion-text-center ion-padding">
+          <ion-icon name="pie-chart-outline"></ion-icon>
+          <p>Aucun budget personnel défini pour l'instant.</p>
+        </div>
+      }
+
+      @if (!budgetsLoading) {
+        @for (item of budgets; track item.budget.id) {
+          <ion-card class="finance-card">
+            <ion-card-content>
+              <div class="finance-header">
+                <div>
+                  <p class="label-top">{{ periodLabel(item) }}</p>
+                  <p class="label-amount">{{ item.budget.amount | number:'1.2-2' }} {{ item.budget.currency }}</p>
+                </div>
+                <ion-button fill="clear" color="medium" (click)="confirmDeleteBudget(item)">
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
+
+              <ion-progress-bar [value]="(item.percentage > 100 ? 100 : item.percentage) / 100"
+                [color]="barColor(item.percentage)"></ion-progress-bar>
+
+              <div class="finance-footer">
+                <span>{{ item.spent | number:'1.2-2' }} € dépensés</span>
+                <span [class.danger-text]="item.percentage >= 100" [class.warning-text]="item.percentage >= 90 && item.percentage < 100">
+                  {{ item.percentage }}%
+                </span>
+              </div>
+              <p class="remaining-label">
+                {{ item.remaining >= 0 ? (item.remaining | number:'1.2-2') + ' € restants' : 'Dépassé de ' + (-item.remaining | number:'1.2-2') + ' €' }}
+              </p>
+            </ion-card-content>
+          </ion-card>
+        }
+      }
+    }
+
+    <!-- ===== Savings goals ===== -->
+    @if (segment === 'savings') {
+
+      @if (showForm) {
+        <form [formGroup]="goalForm" (ngSubmit)="createGoal()" class="finance-form">
+          <ion-list lines="none">
+            <ion-item>
+              <ion-input label="Nom" labelPlacement="stacked" placeholder="Ex : Achat voiture" formControlName="name"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input label="Montant cible (€) *" labelPlacement="stacked" type="number" formControlName="targetAmount"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input label="Échéance" labelPlacement="stacked" type="date" formControlName="targetDate"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-select label="Durée" labelPlacement="stacked" formControlName="term" interface="popover">
+                <ion-select-option value="short">Court terme</ion-select-option>
+                <ion-select-option value="long">Long terme</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </ion-list>
+
+          <ion-button expand="block" type="submit" [disabled]="goalForm.invalid" class="ion-margin-top">
+            Créer
+          </ion-button>
+        </form>
+      }
+
+      @if (goalsLoading) {
+        <div class="ion-text-center ion-padding">
+          <ion-spinner></ion-spinner>
+        </div>
+      }
+
+      @if (!goalsLoading && goals.length === 0) {
+        <div class="empty-state ion-text-center ion-padding">
+          <ion-icon name="flag-outline"></ion-icon>
+          <p>Aucun objectif d'épargne pour l'instant.</p>
+        </div>
+      }
+
+      @if (!goalsLoading) {
+        @for (goal of goals; track goal.id) {
+          <ion-card class="finance-card">
+            <ion-card-content>
+              <div class="finance-header">
+                <div class="goal-title">
+                  @if (isReached(goal)) {
+                    <ion-icon name="trophy" color="warning"></ion-icon>
+                  }
+                  <p class="label-amount">{{ goal.name }}</p>
+                  <ion-badge [color]="goal.term === 'long' ? 'primary' : 'warning'">
+                    {{ termLabels[goal.term] }}
+                  </ion-badge>
+                </div>
+                <ion-button fill="clear" color="medium" (click)="confirmDeleteGoal(goal)">
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
+              </div>
+
+              <ion-progress-bar [value]="progress(goal) / 100"
+                [color]="isReached(goal) ? 'success' : 'primary'"></ion-progress-bar>
+
+              <div class="finance-footer">
+                <span>{{ goal.currentAmount | number:'1.2-2' }} / {{ goal.targetAmount | number:'1.2-2' }} {{ goal.currency }}</span>
+                <span [class.success-text]="isReached(goal)">{{ progress(goal) }}%</span>
+              </div>
+
+              @if (goal.targetDate) {
+                <p class="remaining-label">Échéance : {{ goal.targetDate | date:'dd/MM/yyyy' }}</p>
+              }
+
+              @if (contributingId === goal.id) {
+                <div class="contribute-row">
+                  <ion-input type="number" [(ngModel)]="contributionAmount" placeholder="Montant (€)" fill="outline"></ion-input>
+                  <ion-button size="small" (click)="confirmContribute(goal)">OK</ion-button>
+                  <ion-button size="small" fill="clear" color="medium" (click)="cancelContribute()">Annuler</ion-button>
+                </div>
+              } @else {
+                <ion-button expand="block" fill="outline" size="small" class="ion-margin-top" (click)="startContribute(goal)">
+                  + Contribuer
+                </ion-button>
+              }
+            </ion-card-content>
+          </ion-card>
+        }
+      }
+    }
+  </div>
+</ion-content>

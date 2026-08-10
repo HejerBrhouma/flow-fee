@@ -6,7 +6,11 @@ const routes: Routes = [
   {
     path: '',
     component: DashboardPage,
-  }
+  },
+  {
+    path: 'reports',
+    loadChildren: () => import('../reports/reports.module').then(m => m.ReportsPageModule),
+  },
 ];
 
 @NgModule({

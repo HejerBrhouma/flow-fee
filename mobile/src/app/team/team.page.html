@@ -1,0 +1,74 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/profile"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Équipe</ion-title>
+    @if (authService.hasRole('ROLE_COMPANY_ADMIN')) {
+      <ion-buttons slot="end">
+        <ion-button (click)="showInviteForm = !showInviteForm">
+          <ion-icon slot="icon-only" [name]="showInviteForm ? 'close' : 'person-add-outline'"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    }
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ion-padding">
+
+    @if (showInviteForm && authService.hasRole('ROLE_COMPANY_ADMIN')) {
+      <form [formGroup]="inviteForm" (ngSubmit)="invite()" class="invite-form">
+        <ion-list lines="none">
+          <ion-item>
+            <ion-input label="Email" labelPlacement="stacked" type="email" placeholder="email@exemple.com" formControlName="email"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-select label="Rôle" labelPlacement="stacked" formControlName="role" interface="popover">
+              <ion-select-option value="ROLE_EMPLOYEE">Employé</ion-select-option>
+              <ion-select-option value="ROLE_MANAGER">Manager</ion-select-option>
+              <ion-select-option value="ROLE_COMPANY_ADMIN">Administrateur</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+        <ion-button expand="block" type="submit" [disabled]="inviteForm.invalid" class="ion-margin-top">
+          Inviter
+        </ion-button>
+      </form>
+    }
+
+    @if (loading) {
+      <div class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+      </div>
+    }
+
+    @if (!loading) {
+      @for (member of members; track member.id) {
+        <ion-card class="member-card">
+          <ion-card-content>
+            <div class="member-row">
+              <div class="avatar">{{ member.user.firstName[0] }}{{ member.user.lastName[0] }}</div>
+              <div class="member-info">
+                <p class="name">{{ member.user.fullName }}</p>
+                <p class="email">{{ member.user.email }}</p>
+              </div>
+              <ion-badge color="primary">{{ roleLabels[member.role] }}</ion-badge>
+            </div>
+            <div class="member-footer">
+              <span>Depuis {{ member.joinedAt | date:'dd/MM/yyyy' }}</span>
+              @if (authService.hasRole('ROLE_COMPANY_ADMIN') && member.user.id !== authService.currentUser?.id) {
+                <ion-button size="small" fill="clear" color="danger" (click)="confirmRemove(member)">Retirer</ion-button>
+              }
+            </div>
+          </ion-card-content>
+        </ion-card>
+      } @empty {
+        <div class="empty-state ion-text-center ion-padding">
+          <ion-icon name="people-outline"></ion-icon>
+          <p>Aucun membre pour l'instant.</p>
+        </div>
+      }
+    }
+  </div>
+</ion-content>

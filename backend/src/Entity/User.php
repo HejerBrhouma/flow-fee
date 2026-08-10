@@ -140,6 +140,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->updatedAt = new \DateTime();
     }
 
+    /**
+     * Forces Doctrine to register a dirty field so VichUploaderBundle's preUpdate listener
+     * runs — without a genuine column change, an avatarFile-only update never enters the
+     * UnitOfWork changeset and the upload silently never gets processed.
+     */
+    public function touch(): static
+    {
+        $this->updatedAt = new \DateTime();
+        return $this;
+    }
+
     public function getId(): ?int { return $this->id; }
 
     public function getEmail(): ?string { return $this->email; }
@@ -147,6 +158,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string { return (string) $this->email; }
 
+    #[Groups(['user:read'])]
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -180,6 +192,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getAvatarPath(): ?string { return $this->avatarPath; }
     public function setAvatarPath(?string $path): static { $this->avatarPath = $path; return $this; }
+
+    public function getAvatarFileSize(): ?int { return $this->avatarFileSize; }
+    public function setAvatarFileSize(?int $size): static { $this->avatarFileSize = $size; return $this; }
 
     public function getAvatarUrl(): ?string { return $this->avatarUrl; }
     public function setAvatarUrl(?string $url): static { $this->avatarUrl = $url; return $this; }

@@ -1,6 +1,11 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>Tableau de bord</ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/tabs/dashboard/reports">
+        <ion-icon slot="icon-only" name="stats-chart-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -24,7 +29,7 @@
           <ion-card-content>
             <div class="stat-icon primary"><ion-icon name="wallet-outline"></ion-icon></div>
             <p class="stat-label">Ce mois</p>
-            <p class="stat-value">{{ stats.monthlyTotal | number:'1.2-2' }} €</p>
+            <p class="stat-value">{{ stats.monthlyTotal | number:'1.2-2' }} {{ stats.currency }}</p>
           </ion-card-content>
         </ion-card>
 
@@ -32,7 +37,7 @@
           <ion-card-content>
             <div class="stat-icon secondary"><ion-icon name="trending-up-outline"></ion-icon></div>
             <p class="stat-label">Cette année</p>
-            <p class="stat-value">{{ stats.yearlyTotal | number:'1.2-2' }} €</p>
+            <p class="stat-value">{{ stats.yearlyTotal | number:'1.2-2' }} {{ stats.currency }}</p>
           </ion-card-content>
         </ion-card>
 
@@ -87,7 +92,7 @@
                   <span class="category-dot" [style.background]="cat.color ?? '#6366f1'"></span>
                   <span>{{ cat.icon }} {{ cat.name ?? 'Autre' }}</span>
                 </div>
-                <span class="category-total">{{ cat.total | number:'1.2-2' }} €</span>
+                <span class="category-total">{{ cat.total | number:'1.2-2' }} {{ stats.currency }}</span>
               </div>
               <div class="category-bar-track">
                 <div class="category-bar" [style.width.%]="(cat.total / maxCategoryTotal()) * 100"

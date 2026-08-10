@@ -66,6 +66,7 @@ export interface BudgetConsumption {
 }
 
 export interface DashboardStats {
+  currency: string;
   monthlyTotal: number;
   yearlyTotal: number;
   pendingCount: number;

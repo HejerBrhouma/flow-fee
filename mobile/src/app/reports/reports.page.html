@@ -1,0 +1,86 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/dashboard"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Rapports</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="ion-padding">
+
+    <form [formGroup]="filterForm" (ngSubmit)="load()" class="filter-form">
+      <ion-select formControlName="month" interface="popover" fill="outline">
+        @for (m of monthNames; track m; let i = $index) {
+          <ion-select-option [value]="i + 1">{{ m }}</ion-select-option>
+        }
+      </ion-select>
+      <ion-select formControlName="year" interface="popover" fill="outline">
+        @for (y of years; track y) {
+          <ion-select-option [value]="y">{{ y }}</ion-select-option>
+        }
+      </ion-select>
+      <ion-button type="submit" fill="solid">Actualiser</ion-button>
+    </form>
+
+    @if (loading) {
+      <div class="ion-text-center ion-padding">
+        <ion-spinner></ion-spinner>
+      </div>
+    }
+
+    @if (!loading && stats) {
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Évolution annuelle</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (stats.monthlyTrend.length === 0) {
+            <div class="empty-state">
+              <ion-icon name="bar-chart-outline"></ion-icon>
+              <p>Aucune dépense cette année.</p>
+            </div>
+          } @else {
+            <div class="trend-chart">
+              @for (m of stats.monthlyTrend; track m.month) {
+                <div class="trend-bar-wrapper">
+                  <div class="trend-bar" [style.height.%]="(m.total / maxTrendTotal()) * 100"></div>
+                  <span class="trend-label">{{ monthLabels[m.month - 1] }}</span>
+                </div>
+              }
+            </div>
+          }
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Dépenses par catégorie</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          @if (stats.monthlyByCategory.length === 0) {
+            <div class="empty-state">
+              <ion-icon name="pie-chart-outline"></ion-icon>
+              <p>Aucune dépense ce mois-ci.</p>
+            </div>
+          } @else {
+            @for (cat of stats.monthlyByCategory; track cat.name) {
+              <div class="category-row">
+                <div class="category-info">
+                  <span class="category-dot" [style.background]="cat.color ?? '#6366f1'"></span>
+                  <span>{{ cat.icon }} {{ cat.name ?? 'Autre' }}</span>
+                </div>
+                <span class="category-total">{{ cat.total | number:'1.2-2' }} {{ stats.currency }}</span>
+              </div>
+              <div class="category-bar-track">
+                <div class="category-bar" [style.width.%]="(cat.total / maxCategoryTotal()) * 100"
+                  [style.background]="cat.color ?? '#6366f1'"></div>
+              </div>
+            }
+          }
+        </ion-card-content>
+      </ion-card>
+    }
+  </div>
+</ion-content>

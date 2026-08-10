@@ -135,14 +135,18 @@ class BudgetController extends AbstractController
     {
         $this->assertBudgetAccess($budget);
 
+        // Expenses can each carry their own currency, so "spent" is converted (approximate
+        // live rate — see CurrencyConverter) into the budget's own currency before comparing
+        // it against the budget amount, instead of mixing units.
         $spent = $budget->getUser() !== null
             ? ($budget->getPeriod() === Budget::PERIOD_MONTHLY
-                ? $this->expenseRepository->getTotalByUserAndPeriod($budget->getUser(), $budget->getYear(), $budget->getMonth())
-                : $this->expenseRepository->getTotalByUserAndYear($budget->getUser(), $budget->getYear()))
+                ? $this->expenseRepository->getTotalByUserAndPeriod($budget->getUser(), $budget->getYear(), $budget->getMonth(), $budget->getCurrency())
+                : $this->expenseRepository->getTotalByUserAndYear($budget->getUser(), $budget->getYear(), $budget->getCurrency()))
             : $this->expenseRepository->getTotalByDepartmentAndPeriod(
                 $budget->getDepartment(),
                 $budget->getYear(),
-                $budget->getPeriod() === Budget::PERIOD_MONTHLY ? $budget->getMonth() : null
+                $budget->getPeriod() === Budget::PERIOD_MONTHLY ? $budget->getMonth() : null,
+                $budget->getCurrency()
             );
 
         $amount = (float) $budget->getAmount();

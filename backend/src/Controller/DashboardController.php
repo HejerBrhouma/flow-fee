@@ -25,13 +25,19 @@ class DashboardController extends AbstractController
         $year = $request->query->getInt('year', (int) date('Y'));
         $month = $request->query->getInt('month', (int) date('n'));
 
-        $monthlyTotal = $this->expenseRepository->getTotalByUserAndPeriod($user, $year, $month);
-        $yearlyTotal = $this->expenseRepository->getTotalByUserAndYear($user, $year);
+        // Expenses can each carry their own currency, so every total here is converted
+        // (at an approximate fixed rate — see CurrencyConverter) into the user's preferred
+        // currency before summing, instead of silently mixing units.
+        $currency = $user->getPreferredCurrency() ?? 'EUR';
+
+        $monthlyTotal = $this->expenseRepository->getTotalByUserAndPeriod($user, $year, $month, $currency);
+        $yearlyTotal = $this->expenseRepository->getTotalByUserAndYear($user, $year, $currency);
         $pendingCount = $this->expenseRepository->countByUserAndStatus($user, Expense::STATUS_SUBMITTED);
-        $monthlyByCategory = $this->expenseRepository->getTotalByCategoryAndPeriod($user, $year, $month);
-        $monthlyTrend = $this->expenseRepository->getMonthlyTrend($user, $year);
+        $monthlyByCategory = $this->expenseRepository->getTotalByCategoryAndPeriod($user, $year, $month, $currency);
+        $monthlyTrend = $this->expenseRepository->getMonthlyTrend($user, $year, $currency);
 
         return $this->json([
+            'currency' => $currency,
             'monthlyTotal' => $monthlyTotal,
             'yearlyTotal' => $yearlyTotal,
             'pendingCount' => $pendingCount,

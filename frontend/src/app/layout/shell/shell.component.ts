@@ -1,28 +1,39 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
+import { CompanyService } from '../../core/services/company.service';
 import { IconName } from '../icon/icon.component';
 
 @Component({
   selector: 'app-shell',
   templateUrl: './shell.component.html',
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   sidebarOpen = false;
+  companyId: number | null = null;
 
-  navItems: { label: string; icon: IconName; route: string }[] = [
-    { label: 'Tableau de bord',      icon: 'dashboard', route: '/dashboard' },
-    { label: 'Mes dépenses',         icon: 'expenses',  route: '/expenses' },
-    { label: 'Mon budget',           icon: 'budget',    route: '/budgets' },
-    { label: 'Objectifs d\'épargne', icon: 'savings',   route: '/savings-goals' },
-    { label: 'Rapports',             icon: 'reports',   route: '/reports' },
+  navItems: { labelKey: string; icon: IconName; route: string }[] = [
+    { labelKey: 'nav.dashboard',     icon: 'dashboard', route: '/dashboard' },
+    { labelKey: 'nav.expenses',      icon: 'expenses',  route: '/expenses' },
+    { labelKey: 'nav.budget',        icon: 'budget',    route: '/budgets' },
+    { labelKey: 'nav.savingsGoals',  icon: 'savings',   route: '/savings-goals' },
+    { labelKey: 'nav.reports',       icon: 'reports',   route: '/reports' },
   ];
 
-  proNavItems: { label: string; icon: IconName; route: string }[] = [
-    { label: 'Mon équipe',      icon: 'team',        route: '/company/1/team' },
-    { label: 'Départements',    icon: 'departments', route: '/company/1/departments' },
-  ];
+  constructor(
+    public authService: AuthService,
+    private companyService: CompanyService,
+  ) {}
 
-  constructor(public authService: AuthService) {}
+  ngOnInit(): void {
+    if (!this.isPro()) return;
+
+    // The company id isn't in /auth/me, so it must be looked up via team membership —
+    // hardcoding it (as this used to) breaks for any company other than id 1.
+    this.companyService.getMyMembership().subscribe({
+      next: (membership) => { this.companyId = membership?.company?.id ?? null; },
+      error: () => { this.companyId = null; },
+    });
+  }
 
   isPro(): boolean {
     return this.authService.isProfessional();

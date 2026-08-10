@@ -31,6 +31,23 @@ class CompanyController extends AbstractController
         private readonly ValidatorInterface $validator,
     ) {}
 
+    #[Route('/me', name: 'my_membership', methods: ['GET'])]
+    public function myMembership(): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $membership = $this->userCompanyRepository->findOneBy(['user' => $user]);
+
+        if (!$membership) {
+            return $this->json(null);
+        }
+
+        return $this->json(
+            json_decode($this->serializer->serialize($membership, 'json', ['groups' => ['team:read']]))
+        );
+    }
+
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {

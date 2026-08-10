@@ -13,6 +13,9 @@
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.1",
         "knplabs/knp-paginator-bundle": "^6.3",
+        "knpuniversity/oauth2-client-bundle": "^2.18",
+        "league/oauth2-facebook": "^2.0",
+        "league/oauth2-google": "^4.0",
         "lexik/jwt-authentication-bundle": "^3.1",
         "nelmio/cors-bundle": "^2.4",
         "phpdocumentor/reflection-docblock": "^5.3",
@@ -23,6 +26,7 @@
         "symfony/flex": "^2",
         "symfony/form": "^7.2",
         "symfony/framework-bundle": "^7.2",
+        "symfony/http-client": "^7.2",
         "symfony/mailer": "^7.2",
         "symfony/messenger": "^7.2",
         "symfony/monolog-bundle": "^3.10",
@@ -34,9 +38,6 @@
         "symfony/uid": "^7.2",
         "symfony/validator": "^7.2",
         "symfony/yaml": "^7.2",
-        "knpuniversity/oauth2-client-bundle": "^2.18",
-        "league/oauth2-google": "^4.0",
-        "league/oauth2-facebook": "^2.0",
         "vich/uploader-bundle": "^2.3"
     },
     "require-dev": {

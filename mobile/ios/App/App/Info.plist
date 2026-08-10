@@ -53,6 +53,13 @@
 	<string>Flow Fee a besoin d'accéder à vos photos pour joindre un justificatif à vos dépenses.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Flow Fee a besoin d'enregistrer les photos de justificatifs dans votre photothèque.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Dev-only: the backend runs on plain HTTP on the local network (no TLS cert for a LAN IP).
+		     Remove this before shipping to a real, HTTPS-backed production API. -->
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

@@ -112,6 +112,10 @@ export class ProfileComponent {
     });
   }
 
+  isProfessional(): boolean {
+    return this.authService.isProfessional();
+  }
+
   startChangingPassword(): void {
     this.passwordForm.reset();
     this.changingPassword = true;

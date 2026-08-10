@@ -1,0 +1,45 @@
+{
+  "common": {
+    "language": "اللغة"
+  },
+  "nav": {
+    "dashboard": "لوحة القيادة",
+    "expenses": "مصاريفي",
+    "budget": "ميزانيتي",
+    "savingsGoals": "أهداف الادخار",
+    "reports": "التقارير",
+    "team": "فريقي",
+    "departments": "الأقسام",
+    "newExpense": "+ مصروف جديد"
+  },
+  "accountMenu": {
+    "editProfile": "تعديل ملفي الشخصي",
+    "logout": "تسجيل الخروج"
+  },
+  "login": {
+    "title": "Flow Fee",
+    "subtitle": "سجّل الدخول إلى حسابك",
+    "continueWithGoogle": "المتابعة باستخدام Google",
+    "continueWithFacebook": "المتابعة باستخدام Facebook",
+    "or": "أو",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "anta@exemple.com",
+    "emailInvalid": "بريد إلكتروني غير صالح.",
+    "password": "كلمة المرور",
+    "submit": "تسجيل الدخول",
+    "submitting": "جارٍ تسجيل الدخول...",
+    "noAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب"
+  },
+  "dashboard": {
+    "greeting": "مرحباً، {{name}}",
+    "monthlyExpenses": "مصاريف هذا الشهر",
+    "yearlyExpenses": "مصاريف هذه السنة",
+    "pendingValidation": "بانتظار الموافقة",
+    "addExpense": "إضافة مصروف",
+    "new": "+ جديد",
+    "monthlyTrend": "الاتجاه الشهري",
+    "byCategory": "حسب الفئة",
+    "noDataThisMonth": "لا توجد بيانات هذا الشهر"
+  }
+}
