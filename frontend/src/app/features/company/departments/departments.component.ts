@@ -17,6 +17,7 @@ export class DepartmentsComponent implements OnInit {
   companyId!: number;
   departments: Department[] = [];
   loading = true;
+  error = false;
   showForm = false;
 
   form: FormGroup;
@@ -57,9 +58,15 @@ export class DepartmentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.companyId = +this.route.snapshot.params['id'];
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.error = false;
     this.companyService.getDepartments(this.companyId).subscribe({
       next: (depts) => { this.departments = depts; this.loading = false; },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 

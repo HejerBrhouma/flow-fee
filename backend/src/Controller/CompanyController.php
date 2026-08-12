@@ -10,6 +10,7 @@ use App\Repository\CompanyRepository;
 use App\Repository\UserCompanyRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\CompanyVoter;
+use App\Service\AddressVerificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,7 +30,20 @@ class CompanyController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
+        private readonly AddressVerificationService $addressVerification,
     ) {}
+
+    #[Route('/verify-address', name: 'verify_address', methods: ['GET'])]
+    public function verifyAddress(Request $request): JsonResponse
+    {
+        $country = $request->query->get('country', '');
+        $city = $request->query->get('city', '');
+        $zipCode = $request->query->get('zipCode', '');
+
+        $valid = $this->addressVerification->exists($country, $city, $zipCode);
+
+        return $this->json(['valid' => $valid]);
+    }
 
     #[Route('/me', name: 'my_membership', methods: ['GET'])]
     public function myMembership(): JsonResponse
@@ -48,16 +62,32 @@ class CompanyController extends AbstractController
         );
     }
 
+    // Which identification number each country requires, and its expected format.
+    // Countries not listed here fall back to accepting either field, unvalidated — we can't
+    // realistically hardcode every country's business registry format.
+    private const TAX_ID_RULES = [
+        'France' => ['field' => 'siret', 'pattern' => '/^\d{14}$/', 'message' => 'Le SIRET doit contenir exactement 14 chiffres.'],
+        'Tunisie' => ['field' => 'taxId', 'pattern' => '/^\d{7}[A-Z]{3}\d{3}$/', 'message' => 'Le matricule fiscal doit être au format 1234567AAM000 (7 chiffres, 3 lettres, 3 chiffres).'],
+    ];
+
     #[Route('', name: 'create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
         /** @var User $user */
         $user = $this->getUser();
+
+        // One company per user keeps a company's admin membership unambiguous — an existing
+        // member creating a second company would otherwise silently become an admin of two.
+        if ($this->userCompanyRepository->findOneBy(['user' => $user])) {
+            return $this->json(['errors' => ['name' => 'Vous appartenez déjà à une entreprise.']], Response::HTTP_CONFLICT);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $company = new Company();
         $company->setName($data['name'] ?? '');
-        $company->setSiret($data['siret'] ?? null);
+        $company->setSiret($this->normalizeIdentifier($data['siret'] ?? null));
+        $company->setTaxId($this->normalizeIdentifier($data['taxId'] ?? null));
         $company->setAddress($data['address'] ?? null);
         $company->setCity($data['city'] ?? null);
         $company->setZipCode($data['zipCode'] ?? null);
@@ -70,6 +100,24 @@ class CompanyController extends AbstractController
                 $messages[$error->getPropertyPath()] = $error->getMessage();
             }
             return $this->json(['errors' => $messages], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if ($identificationError = $this->validateIdentification($company)) {
+            return $this->json(['errors' => $identificationError], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if ($duplicateError = $this->findDuplicateIdentification($company)) {
+            return $this->json(['errors' => $duplicateError], Response::HTTP_CONFLICT);
+        }
+
+        if ($company->getCity() && $company->getZipCode()) {
+            $addressValid = $this->addressVerification->exists($company->getCountry(), $company->getCity(), $company->getZipCode());
+            // null means the lookup service was unreachable — don't block company creation on it.
+            if ($addressValid === false) {
+                return $this->json([
+                    'errors' => ['zipCode' => "Ce code postal ne correspond pas à la ville indiquée pour ce pays."],
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
         }
 
         $this->em->persist($company);
@@ -222,5 +270,60 @@ class CompanyController extends AbstractController
             json_decode($this->serializer->serialize($department, 'json', ['groups' => ['department:read']])),
             Response::HTTP_CREATED
         );
+    }
+
+    private function normalizeIdentifier(?string $value): ?string
+    {
+        if (!$value) {
+            return null;
+        }
+
+        $normalized = strtoupper(str_replace(['/', ' ', '-'], '', trim($value)));
+
+        return $normalized !== '' ? $normalized : null;
+    }
+
+    /**
+     * @return array<string, string>|null a property-path-keyed error, or null if valid
+     */
+    private function validateIdentification(Company $company): ?array
+    {
+        $rule = self::TAX_ID_RULES[$company->getCountry()] ?? null;
+        if (!$rule) {
+            return null;
+        }
+
+        $getter = 'get' . ucfirst($rule['field']);
+        $value = $company->$getter();
+
+        if (!$value) {
+            return [$rule['field'] => sprintf(
+                '%s est requis pour une entreprise enregistrée en %s.',
+                $rule['field'] === 'siret' ? 'Le SIRET' : 'Le matricule fiscal',
+                $company->getCountry()
+            )];
+        }
+
+        if (!preg_match($rule['pattern'], $value)) {
+            return [$rule['field'] => $rule['message']];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, string>|null a property-path-keyed error, or null if no conflict
+     */
+    private function findDuplicateIdentification(Company $company): ?array
+    {
+        if ($company->getSiret() && $this->companyRepository->findOneBy(['siret' => $company->getSiret()])) {
+            return ['siret' => 'Ce SIRET est déjà enregistré par une autre entreprise.'];
+        }
+
+        if ($company->getTaxId() && $this->companyRepository->findOneBy(['taxId' => $company->getTaxId()])) {
+            return ['taxId' => 'Ce matricule fiscal est déjà enregistré par une autre entreprise.'];
+        }
+
+        return null;
     }
 }

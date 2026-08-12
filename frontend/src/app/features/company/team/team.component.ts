@@ -14,6 +14,7 @@ export class TeamComponent implements OnInit {
   companyId!: number;
   members: UserCompany[] = [];
   loading = true;
+  error = false;
   showInviteForm = false;
 
   inviteForm: FormGroup;
@@ -43,9 +44,11 @@ export class TeamComponent implements OnInit {
   }
 
   loadTeam(): void {
+    this.loading = true;
+    this.error = false;
     this.companyService.getTeam(this.companyId).subscribe({
       next: (members) => { this.members = members; this.loading = false; },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 

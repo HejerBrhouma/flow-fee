@@ -11,8 +11,13 @@ export interface User {
   phone?: string;
   preferredCurrency?: string | null;
   roles: string[];
+  twoFactorEnabled?: boolean;
   createdAt: string;
 }
+
+export type LoginResult =
+  | { requiresTwoFactor: false; user: User }
+  | { requiresTwoFactor: true; challengeToken: string };
 
 export interface UpdateProfilePayload {
   firstName: string;

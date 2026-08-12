@@ -19,6 +19,7 @@ export class NotificationsPage implements OnInit {
   notifications: Notification[] = [];
   unreadCount = 0;
   loading = true;
+  error = false;
 
   readonly icons: Record<NotificationType, string> = {
     expense_submitted: 'send-outline',
@@ -27,6 +28,15 @@ export class NotificationsPage implements OnInit {
     budget_alert: 'warning-outline',
     team_invite: 'people-outline',
     savings_goal_reached: 'trophy-outline',
+  };
+
+  readonly colors: Record<NotificationType, string> = {
+    expense_submitted: 'primary',
+    expense_approved: 'success',
+    expense_rejected: 'danger',
+    budget_alert: 'warning',
+    team_invite: 'primary',
+    savings_goal_reached: 'warning',
   };
 
   constructor(
@@ -44,6 +54,7 @@ export class NotificationsPage implements OnInit {
 
   load(event?: CustomEvent): void {
     this.loading = !event;
+    this.error = false;
     this.notificationService.getAll().subscribe({
       next: (res) => {
         this.notifications = res.items;
@@ -53,6 +64,7 @@ export class NotificationsPage implements OnInit {
       },
       error: () => {
         this.loading = false;
+        if (!event) this.error = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });

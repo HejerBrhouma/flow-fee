@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DepartmentsPage } from './departments.page';
+import { SharedModule } from '../shared/shared.module';
 
 import { DepartmentsPageRoutingModule } from './departments-routing.module';
 
@@ -12,7 +13,8 @@ import { DepartmentsPageRoutingModule } from './departments-routing.module';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    DepartmentsPageRoutingModule
+    DepartmentsPageRoutingModule,
+    SharedModule
   ],
   declarations: [DepartmentsPage]
 })

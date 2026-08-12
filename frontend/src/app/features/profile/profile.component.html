@@ -1,10 +1,10 @@
 <div class="p-6 max-w-lg mx-auto space-y-6">
-  <h2 class="text-2xl font-bold text-gray-800">Mon compte</h2>
+  <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mon compte</h2>
 
   @if (authService.currentUser; as user) {
 
     <!-- Identity + avatar -->
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
       <div class="flex items-center gap-4">
         <div class="relative shrink-0">
           @if (user.avatarUrl) {
@@ -22,8 +22,8 @@
           }
         </div>
         <div class="min-w-0">
-          <p class="text-xl font-semibold text-gray-800 truncate">{{ user.fullName }}</p>
-          <p class="text-sm text-gray-500 truncate">{{ user.email }}</p>
+          <p class="text-xl font-semibold text-gray-800 truncate dark:text-gray-100">{{ user.fullName }}</p>
+          <p class="text-sm text-gray-500 truncate dark:text-gray-400">{{ user.email }}</p>
           <div class="flex items-center gap-3 mt-2">
             <label class="text-xs font-medium text-indigo-600 hover:underline cursor-pointer">
               Changer la photo
@@ -40,29 +40,29 @@
     </div>
 
     <!-- Personal info + preferences -->
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-      <h3 class="text-sm font-semibold text-gray-800 mb-4">Informations personnelles</h3>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4 dark:text-gray-100">Informations personnelles</h3>
 
       @if (!editing) {
         <div class="space-y-2">
           <div class="flex justify-between">
-            <span class="text-gray-500 text-sm">Type de compte</span>
+            <span class="text-gray-500 text-sm dark:text-gray-400">Type de compte</span>
             <span class="font-medium text-sm capitalize">
               {{ user.type === 'personal' ? 'Particulier' : 'Professionnel' }}
             </span>
           </div>
           @if (user.phone) {
             <div class="flex justify-between">
-              <span class="text-gray-500 text-sm">Téléphone</span>
+              <span class="text-gray-500 text-sm dark:text-gray-400">Téléphone</span>
               <span class="font-medium text-sm">{{ user.phone }}</span>
             </div>
           }
           <div class="flex justify-between">
-            <span class="text-gray-500 text-sm">Devise préférée</span>
+            <span class="text-gray-500 text-sm dark:text-gray-400">Devise préférée</span>
             <span class="font-medium text-sm">{{ user.preferredCurrency ?? 'EUR' }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-500 text-sm">Membre depuis</span>
+            <span class="text-gray-500 text-sm dark:text-gray-400">Membre depuis</span>
             <span class="font-medium text-sm">{{ user.createdAt | date:'MMMM yyyy':'':'fr' }}</span>
           </div>
         </div>
@@ -74,27 +74,27 @@
       } @else {
         <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Prénom</label>
             <input formControlName="firstName" type="text"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Nom</label>
             <input formControlName="lastName" type="text"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Téléphone</label>
             <input formControlName="phone" type="tel" placeholder="Optionnel"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Devise préférée</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Devise préférée</label>
             <select formControlName="preferredCurrency"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
               @for (c of currencies; track c.value) {
                 <option [value]="c.value">{{ c.label }}</option>
               }
@@ -107,7 +107,7 @@
               {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
             </button>
             <button type="button" (click)="cancelEditing()"
-              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition">
+              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
               Annuler
             </button>
           </div>
@@ -116,27 +116,33 @@
     </div>
 
     <!-- Security -->
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-      <h3 class="text-sm font-semibold text-gray-800 mb-4">Sécurité</h3>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+      <h3 class="text-sm font-semibold text-gray-800 mb-4 dark:text-gray-100">Sécurité</h3>
 
       @if (!changingPassword) {
-        <button (click)="startChangingPassword()"
-          class="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition">
-          Changer le mot de passe
-        </button>
+        <div class="space-y-3">
+          <button (click)="startChangingPassword()"
+            class="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+            Changer le mot de passe
+          </button>
+          <button (click)="exportData()" [disabled]="exporting"
+            class="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition disabled:opacity-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+            {{ exporting ? 'Export en cours...' : 'Exporter mes données' }}
+          </button>
+        </div>
       } @else {
         <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe actuel</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Mot de passe actuel</label>
             <input formControlName="currentPassword" type="password"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Nouveau mot de passe</label>
             <input formControlName="newPassword" type="password"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <p class="text-xs text-gray-400 mt-1">8 caractères minimum.</p>
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            <p class="text-xs text-gray-400 mt-1 dark:text-gray-500">8 caractères minimum.</p>
           </div>
 
           <div class="flex gap-3">
@@ -145,7 +151,7 @@
               {{ savingPassword ? 'Enregistrement...' : 'Enregistrer' }}
             </button>
             <button type="button" (click)="cancelChangingPassword()"
-              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition">
+              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
               Annuler
             </button>
           </div>
@@ -153,10 +159,74 @@
       }
     </div>
 
+    <!-- Two-factor authentication -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+      <h3 class="text-sm font-semibold text-gray-800 mb-1 dark:text-gray-100">Double authentification</h3>
+      <p class="text-sm text-gray-500 mb-4 dark:text-gray-400">
+        Protégez votre compte avec un code généré par une application d'authentification (Google Authenticator, Authy...).
+      </p>
+
+      @if (authService.currentUser?.twoFactorEnabled) {
+        @if (!showDisableTwoFactor) {
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-green-600 font-medium">✓ Activée</span>
+            <button (click)="startDisableTwoFactor()"
+              class="border border-red-300 text-red-600 rounded-lg px-4 py-2 text-sm font-medium hover:bg-red-50 transition">
+              Désactiver
+            </button>
+          </div>
+        } @else {
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">Confirmez votre mot de passe</label>
+            <input type="password" [(ngModel)]="disableTwoFactorPassword" placeholder="Mot de passe"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+            <div class="flex gap-3">
+              <button (click)="confirmDisableTwoFactor()" [disabled]="disablingTwoFactor || !disableTwoFactorPassword"
+                class="flex-1 bg-red-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-red-700 transition disabled:opacity-50">
+                {{ disablingTwoFactor ? 'Désactivation...' : 'Confirmer' }}
+              </button>
+              <button type="button" (click)="cancelDisableTwoFactor()"
+                class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                Annuler
+              </button>
+            </div>
+          </div>
+        }
+      } @else if (!settingUpTwoFactor) {
+        <button (click)="startTwoFactorSetup()"
+          class="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+          Activer la double authentification
+        </button>
+      } @else {
+        <div class="space-y-3">
+          @if (twoFactorSecret) {
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+              Ajoutez cette clé dans votre application d'authentification, puis entrez le code généré :
+            </p>
+            <div class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 font-mono text-sm break-all select-all dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
+              {{ twoFactorSecret }}
+            </div>
+          }
+          <input type="text" inputmode="numeric" [(ngModel)]="twoFactorCode" placeholder="Code à 6 chiffres" maxlength="6"
+            class="w-full text-center text-xl tracking-[0.4em] border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+          <div class="flex gap-3">
+            <button (click)="confirmTwoFactorSetup()" [disabled]="enablingTwoFactor || !twoFactorCode"
+              class="flex-1 bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+              {{ enablingTwoFactor ? 'Vérification...' : 'Activer' }}
+            </button>
+            <button type="button" (click)="cancelTwoFactorSetup()"
+              class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+              Annuler
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
     @if (!isProfessional()) {
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 class="text-sm font-semibold text-gray-800 mb-2">Entreprise</h3>
-        <p class="text-sm text-gray-500 mb-4">Vous n'appartenez à aucune entreprise pour l'instant.</p>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-gray-800 mb-2 dark:text-gray-100">Entreprise</h3>
+        <p class="text-sm text-gray-500 mb-4 dark:text-gray-400">Vous n'appartenez à aucune entreprise pour l'instant.</p>
         <a routerLink="/company/setup"
           class="block text-center w-full bg-indigo-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-indigo-700 transition">
           Créer une entreprise
@@ -165,11 +235,45 @@
     }
 
     <!-- Session -->
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
       <button (click)="authService.logout()"
         class="w-full border border-red-300 text-red-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-red-50 transition">
         Se déconnecter
       </button>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="bg-white rounded-xl border border-red-200 shadow-sm p-6 dark:bg-gray-800 dark:border-red-900">
+      <h3 class="text-sm font-semibold text-red-600 mb-2">Zone de danger</h3>
+
+      @if (!showDeleteConfirm) {
+        <p class="text-sm text-gray-500 mb-4 dark:text-gray-400">
+          La suppression de votre compte est définitive et effacera toutes vos données personnelles.
+        </p>
+        <button (click)="startDeleteAccount()"
+          class="w-full bg-red-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-red-700 transition">
+          Supprimer mon compte
+        </button>
+      } @else {
+        <p class="text-sm text-gray-600 mb-3 dark:text-gray-300">
+          Confirmez votre mot de passe pour supprimer définitivement votre compte.
+        </p>
+        <input type="password" [(ngModel)]="deletePassword" placeholder="Mot de passe"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+        @if (deleteError) {
+          <p class="text-xs text-red-500 mb-2">{{ deleteError }}</p>
+        }
+        <div class="flex gap-3">
+          <button (click)="confirmDeleteAccount()" [disabled]="deleting || !deletePassword"
+            class="flex-1 bg-red-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-red-700 transition disabled:opacity-50">
+            {{ deleting ? 'Suppression...' : 'Confirmer la suppression' }}
+          </button>
+          <button type="button" (click)="cancelDeleteAccount()"
+            class="border border-gray-300 text-gray-600 rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Annuler
+          </button>
+        </div>
+      }
     </div>
   }
 </div>

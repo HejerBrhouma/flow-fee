@@ -1,24 +1,24 @@
-<div class="flex h-screen bg-gray-50 overflow-hidden">
+<div class="flex h-screen bg-gray-50 overflow-hidden dark:bg-gray-900">
 
   <!-- Sidebar -->
-  <aside class="flex flex-col w-64 bg-white border-r border-gray-100 shrink-0"
+  <aside class="flex flex-col w-64 bg-white border-r border-gray-100 shrink-0 dark:bg-gray-800 dark:border-gray-700"
          [class.hidden]="false">
 
     <!-- Logo -->
-    <div class="flex items-center gap-2 px-6 py-5 border-b border-gray-100">
+    <div class="flex items-center gap-2 px-6 py-5 border-b border-gray-100 dark:border-gray-700">
       <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
         <span class="text-white font-bold text-sm">FF</span>
       </div>
-      <span class="font-bold text-gray-800 text-lg">Flow Fee</span>
+      <span class="font-bold text-gray-800 text-lg dark:text-gray-100">Flow Fee</span>
     </div>
 
     <!-- Navigation -->
     <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
 
       @for (item of navItems; track item.route) {
-        <a [routerLink]="item.route" routerLinkActive="bg-indigo-50 text-indigo-600"
+        <a [routerLink]="item.route" routerLinkActive="bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
           [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
           <app-icon [name]="item.icon"></app-icon>
           {{ item.labelKey | translate }}
         </a>
@@ -26,15 +26,15 @@
 
       @if (isPro() && companyId) {
         <div class="pt-4 pb-1">
-          <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Entreprise</p>
+          <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider dark:text-gray-500">Entreprise</p>
         </div>
-        <a [routerLink]="['/company', companyId, 'team']" routerLinkActive="bg-indigo-50 text-indigo-600"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+        <a [routerLink]="['/company', companyId, 'team']" routerLinkActive="bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
           <app-icon name="team"></app-icon>
           {{ 'nav.team' | translate }}
         </a>
-        <a [routerLink]="['/company', companyId, 'departments']" routerLinkActive="bg-indigo-50 text-indigo-600"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+        <a [routerLink]="['/company', companyId, 'departments']" routerLinkActive="bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
           <app-icon name="departments"></app-icon>
           {{ 'nav.departments' | translate }}
         </a>
@@ -42,7 +42,7 @@
     </nav>
 
     <!-- Account menu -->
-    <div class="p-3 border-t border-gray-100">
+    <div class="p-3 border-t border-gray-100 dark:border-gray-700">
       <app-account-menu></app-account-menu>
     </div>
   </aside>
@@ -51,7 +51,7 @@
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Top bar -->
-    <header class="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between shrink-0">
+    <header class="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between shrink-0 dark:bg-gray-800 dark:border-gray-700">
       <div>
         <!-- Breadcrumb or page title via outlet -->
       </div>
@@ -60,6 +60,7 @@
           class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
           {{ 'nav.newExpense' | translate }}
         </a>
+        <app-theme-toggle></app-theme-toggle>
         <app-language-switcher></app-language-switcher>
         <app-notification-bell></app-notification-bell>
         <a routerLink="/profile"

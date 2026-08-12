@@ -30,6 +30,11 @@ class Company
     #[Groups(['company:read'])]
     private ?string $siret = null;
 
+    // Tunisian tax identification number ("matricule fiscal"), e.g. 1234567AAM000.
+    #[ORM\Column(length: 20, nullable: true, unique: true)]
+    #[Groups(['company:read'])]
+    private ?string $taxId = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['company:read'])]
     private ?string $address = null;
@@ -88,6 +93,8 @@ class Company
     public function setName(string $name): static { $this->name = $name; return $this; }
     public function getSiret(): ?string { return $this->siret; }
     public function setSiret(?string $siret): static { $this->siret = $siret; return $this; }
+    public function getTaxId(): ?string { return $this->taxId; }
+    public function setTaxId(?string $taxId): static { $this->taxId = $taxId; return $this; }
     public function getAddress(): ?string { return $this->address; }
     public function setAddress(?string $address): static { $this->address = $address; return $this; }
     public function getCity(): ?string { return $this->city; }

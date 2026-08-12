@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
+import { SharedModule } from '../../shared/shared.module';
 
 import { BudgetsComponent } from './budgets.component';
 
@@ -11,6 +12,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [BudgetsComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes), SharedModule],
 })
 export class BudgetsModule {}

@@ -28,12 +28,23 @@
   </ion-refresher>
 
   @if (loading) {
-    <div class="ion-text-center ion-padding">
-      <ion-spinner></ion-spinner>
+    <div class="expense-list ion-padding-horizontal">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <ion-card>
+          <ion-card-content>
+            <app-skeleton-block width="50%" height="1rem" class="ion-margin-bottom"></app-skeleton-block>
+            <app-skeleton-block width="30%" height="0.875rem"></app-skeleton-block>
+          </ion-card-content>
+        </ion-card>
+      }
     </div>
   }
 
-  @if (!loading && expenses.length === 0) {
+  @if (error) {
+    <app-error-state message="Impossible de charger vos dépenses." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error && expenses.length === 0) {
     <div class="empty-state ion-text-center ion-padding">
       <ion-icon name="receipt-outline"></ion-icon>
       <p>Aucune dépense pour le moment.</p>
@@ -44,29 +55,39 @@
     </div>
   }
 
-  @if (!loading) {
-    <ion-list>
+  @if (!loading && !error) {
+    <div class="expense-list ion-padding-horizontal">
       @for (expense of expenses; track expense.id) {
-        <ion-item-sliding>
-          <ion-item [routerLink]="['/tabs/expenses', expense.id]" button detail="true">
+        <ion-item-sliding class="expense-sliding">
+          <ion-item [routerLink]="['/tabs/expenses', expense.id]" button detail="false" lines="none" class="expense-card">
+            <div class="category-icon" slot="start" [style.background]="(expense.category?.color ?? '#6366f1') + '22'"
+              [style.color]="expense.category?.color ?? '#6366f1'">
+              @if (expense.category?.icon) {
+                {{ expense.category?.icon }}
+              } @else {
+                <ion-icon name="receipt-outline"></ion-icon>
+              }
+            </div>
             <ion-label>
               <h2>{{ expense.title }}</h2>
               <p>{{ expense.expenseDate | date:'dd MMM yyyy':'':'fr' }}</p>
             </ion-label>
-            <ion-note slot="end" class="amount">{{ expense.amount | number:'1.2-2' }} {{ expense.currency }}</ion-note>
-            <ion-badge slot="end" [color]="statusColors[expense.status]">{{ statusLabels[expense.status] }}</ion-badge>
+            <div slot="end" class="expense-meta">
+              <span class="amount">{{ expense.amount | number:'1.2-2' }} {{ expense.currency }}</span>
+              <ion-badge [color]="statusColors[expense.status]">{{ statusLabels[expense.status] }}</ion-badge>
+            </div>
           </ion-item>
 
           @if (canEdit(expense)) {
             <ion-item-options side="end">
               <ion-item-option color="danger" (click)="delete(expense, $event)">
-                Supprimer
+                <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
               </ion-item-option>
             </ion-item-options>
           }
         </ion-item-sliding>
       }
-    </ion-list>
+    </div>
 
     <ion-infinite-scroll (ionInfinite)="loadMore($event)">
       <ion-infinite-scroll-content></ion-infinite-scroll-content>

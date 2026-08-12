@@ -1,42 +1,76 @@
 <div class="p-6 max-w-xl mx-auto">
-  <h2 class="text-2xl font-bold text-gray-800 mb-2">Créer votre entreprise</h2>
-  <p class="text-gray-500 mb-6">Configurez votre espace professionnel.</p>
+  <h2 class="text-2xl font-bold text-gray-800 mb-2 dark:text-gray-100">Créer votre entreprise</h2>
+  <p class="text-gray-500 mb-6 dark:text-gray-400">Configurez votre espace professionnel.</p>
 
-  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 dark:bg-gray-800 dark:border-gray-700">
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nom de l'entreprise *</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Nom de l'entreprise *</label>
         <input formControlName="name" type="text" placeholder="Ma Société SAS"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">SIRET</label>
-        <input formControlName="siret" type="text" placeholder="12345678901234"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Pays *</label>
+        <select formControlName="country"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+          @for (c of countries; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
       </div>
 
+      @if (taxIdRule) {
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">{{ taxIdRule.label }} *</label>
+          <input [formControlName]="taxIdRule.field" type="text" [placeholder]="taxIdRule.placeholder"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+          <p class="text-xs text-gray-400 mt-1 dark:text-gray-500">{{ taxIdRule.hint }}</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">SIRET</label>
+            <input formControlName="siret" type="text"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Numéro d'identification fiscale</label>
+            <input formControlName="taxId" type="text"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+          </div>
+        </div>
+      }
+
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Adresse</label>
         <input formControlName="address" type="text"
-          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
       </div>
 
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Ville</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Ville</label>
           <input formControlName="city" type="text"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Code postal</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-200">Code postal</label>
           <input formControlName="zipCode" type="text"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            class="w-full border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
         </div>
       </div>
 
-      <button type="submit" [disabled]="loading || form.invalid"
+      @if (addressCheck === 'checking') {
+        <p class="text-xs text-gray-400 dark:text-gray-500">Vérification de l'adresse...</p>
+      } @else if (addressCheck === 'valid') {
+        <p class="text-xs text-green-600">✓ Adresse vérifiée.</p>
+      } @else if (addressCheck === 'invalid') {
+        <p class="text-xs text-red-500">Ce code postal ne semble pas correspondre à cette ville pour ce pays.</p>
+      }
+
+      <button type="submit" [disabled]="loading || form.invalid || addressCheck === 'invalid'"
         class="w-full bg-indigo-600 text-white rounded-lg px-4 py-2.5 font-medium hover:bg-indigo-700 transition disabled:opacity-50">
         {{ loading ? 'Création...' : 'Créer l\'entreprise' }}
       </button>

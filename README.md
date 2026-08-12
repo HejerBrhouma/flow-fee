@@ -67,6 +67,8 @@ Deux fonctionnalités nécessitent des identifiants externes réels pour fonctio
   Sur mobile, l'app doit être compilée (Xcode/Android Studio) pour que le schéma d'URL personnalisé `com.flowfee.app://` soit intercepté par l'OS (déjà déclaré dans `Info.plist` et `AndroidManifest.xml`) — en test via `ionic serve`/Safari mobile sans build natif, le retour de l'OAuth échouera après authentification.
 - **Envoi d'emails** : `MAILER_DSN` pointe par défaut vers un serveur SMTP local factice (`localhost:1025`, ex. Mailhog) — à adapter si besoin.
 
+**Conversion de devises** : les dépenses, budgets et objectifs d'épargne peuvent chacun avoir leur propre devise (EUR, USD, GBP, TND). Pour que les totaux (tableau de bord, consommation de budget) restent cohérents, `App\Service\CurrencyConverter` convertit tout dans une devise commune avant de sommer, en utilisant les taux de change en temps réel de [open.er-api.com](https://www.exchangerate-api.com/docs/free) — une API gratuite, sans clé requise. Les taux sont mis en cache 12h ; si l'API est injoignable, un repli sur des taux approximatifs statiques (codés dans le service) est utilisé automatiquement.
+
 ## Application mobile
 
 Le dossier `mobile/` contient une application Ionic + Angular + Capacitor qui consomme la **même API** que le frontend web (aucune différence côté backend). Le périmètre actuel couvre l'essentiel : authentification, tableau de bord, dépenses (liste, création, détail, justificatif photo via la caméra native), notifications, profil/déconnexion. Budgets, objectifs d'épargne et gestion d'entreprise ne sont pas encore portés sur mobile.

@@ -9,23 +9,6 @@
   }
 }
 
-.empty-state {
-  text-align: center;
-  padding: 12px 0;
-  color: var(--ion-color-medium);
-
-  ion-icon {
-    font-size: 28px;
-    opacity: 0.5;
-    margin-bottom: 6px;
-  }
-
-  p {
-    margin: 0;
-    font-size: 13px;
-  }
-}
-
 .trend-chart {
   display: flex;
   align-items: flex-end;
@@ -49,6 +32,11 @@
   min-height: 2px;
   background: var(--ion-color-primary);
   border-radius: 3px 3px 0 0;
+  transition: height 0.3s ease;
+
+  &.is-empty {
+    background: var(--ion-color-light-shade);
+  }
 }
 
 .trend-label {

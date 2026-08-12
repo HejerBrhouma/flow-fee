@@ -13,6 +13,7 @@ import { BudgetConsumption } from '../../core/models/company.model';
 export class BudgetsComponent implements OnInit {
   budgets: BudgetConsumption[] = [];
   loading = true;
+  error = false;
   showForm = false;
 
   readonly months = [
@@ -42,6 +43,7 @@ export class BudgetsComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.error = false;
     this.budgetService.getMyBudgets().subscribe({
       next: (budgets) => {
         if (budgets.length === 0) {
@@ -57,7 +59,7 @@ export class BudgetsComponent implements OnInit {
           this.loading = false;
         });
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 

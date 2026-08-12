@@ -18,12 +18,28 @@
     <h2 class="greeting">Bonjour, {{ authService.currentUser?.firstName }} 👋</h2>
 
     @if (loading) {
-      <div class="ion-text-center ion-padding">
-        <ion-spinner></ion-spinner>
+      <div class="stats-grid">
+        @for (i of [1, 2, 3]; track i) {
+          <ion-card class="stat-card">
+            <ion-card-content>
+              <app-skeleton-block width="60%" height="0.75rem" class="ion-margin-bottom"></app-skeleton-block>
+              <app-skeleton-block width="80%" height="1.25rem"></app-skeleton-block>
+            </ion-card-content>
+          </ion-card>
+        }
       </div>
+      <ion-card>
+        <ion-card-content>
+          <app-skeleton-block width="100%" height="120px"></app-skeleton-block>
+        </ion-card-content>
+      </ion-card>
     }
 
-    @if (!loading && stats) {
+    @if (error) {
+      <app-error-state message="Impossible de charger le tableau de bord." (retry)="load()"></app-error-state>
+    }
+
+    @if (!loading && !error && stats) {
       <div class="stats-grid">
         <ion-card class="stat-card">
           <ion-card-content>
@@ -58,15 +74,15 @@
         </ion-card-header>
         <ion-card-content>
           @if (stats.monthlyTrend.length === 0) {
-            <div class="empty-state">
+            <div class="empty-state compact">
               <ion-icon name="bar-chart-outline"></ion-icon>
               <p class="empty">Aucune dépense cette année.</p>
             </div>
           } @else {
             <div class="trend-chart">
-              @for (m of stats.monthlyTrend; track m.month) {
+              @for (m of fullYearTrend; track m.month) {
                 <div class="trend-bar-wrapper">
-                  <div class="trend-bar" [style.height.%]="(m.total / maxTrendTotal()) * 100"></div>
+                  <div class="trend-bar" [class.is-empty]="m.total === 0" [style.height.%]="(m.total / maxTrendTotal()) * 100"></div>
                   <span class="trend-label">{{ monthLabels[m.month - 1] }}</span>
                 </div>
               }
@@ -81,7 +97,7 @@
         </ion-card-header>
         <ion-card-content>
           @if (stats.monthlyByCategory.length === 0) {
-            <div class="empty-state">
+            <div class="empty-state compact">
               <ion-icon name="pie-chart-outline"></ion-icon>
               <p class="empty">Aucune dépense ce mois-ci.</p>
             </div>

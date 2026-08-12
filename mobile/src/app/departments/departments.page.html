@@ -40,12 +40,21 @@
     }
 
     @if (loading) {
-      <div class="ion-text-center ion-padding">
-        <ion-spinner></ion-spinner>
-      </div>
+      @for (i of [1, 2, 3]; track i) {
+        <ion-card class="dept-card">
+          <ion-card-content>
+            <app-skeleton-block width="50%" height="1rem" class="ion-margin-bottom"></app-skeleton-block>
+            <app-skeleton-block width="100%" height="2rem"></app-skeleton-block>
+          </ion-card-content>
+        </ion-card>
+      }
     }
 
-    @if (!loading) {
+    @if (error) {
+      <app-error-state message="Impossible de charger les départements." (retry)="load()"></app-error-state>
+    }
+
+    @if (!loading && !error) {
       @for (dept of departments; track dept.id) {
         <ion-card class="dept-card">
           <ion-card-content>

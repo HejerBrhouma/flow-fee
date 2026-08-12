@@ -1,7 +1,7 @@
 <div class="p-6">
 
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">Mes dépenses</h2>
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mes dépenses</h2>
     <a routerLink="/expenses/new"
       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
       + Nouvelle dépense
@@ -9,9 +9,9 @@
   </div>
 
   <!-- Filters -->
-  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="bg-white rounded-xl border border-gray-100 p-4 mb-6 flex flex-wrap gap-4">
+  <form [formGroup]="filterForm" (ngSubmit)="applyFilters()" class="bg-white rounded-xl border border-gray-100 p-4 mb-6 flex flex-wrap gap-4 dark:bg-gray-800 dark:border-gray-700">
     <select formControlName="status"
-      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
       <option value="">Tous les statuts</option>
       <option value="draft">Brouillon</option>
       <option value="submitted">En attente</option>
@@ -20,10 +20,10 @@
     </select>
 
     <input formControlName="dateFrom" type="date"
-      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
 
     <input formControlName="dateTo" type="date"
-      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
 
     <button type="submit"
       class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition">
@@ -32,23 +32,29 @@
   </form>
 
   @if (loading) {
-    <div class="flex justify-center py-12">
-      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden p-4 space-y-4 dark:bg-gray-800 dark:border-gray-700">
+      @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="flex items-center justify-between">
+          <app-skeleton-block width="30%" height="1rem"></app-skeleton-block>
+          <app-skeleton-block width="15%" height="1rem"></app-skeleton-block>
+          <app-skeleton-block width="10%" height="1.5rem"></app-skeleton-block>
+        </div>
+      }
     </div>
   }
 
-  @if (!loading) {
-    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+  @if (error) {
+    <app-error-state message="Impossible de charger vos dépenses." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error) {
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
       @if (expenses.length === 0) {
-        <div class="text-center py-12 text-gray-400">
-          <p class="text-lg">Aucune dépense trouvée</p>
-          <a routerLink="/expenses/new" class="text-indigo-600 text-sm mt-2 inline-block hover:underline">
-            Ajouter votre première dépense
-          </a>
-        </div>
+        <app-empty-state icon="expenses" message="Aucune dépense trouvée"
+          ctaLabel="Ajouter votre première dépense" ctaLink="/expenses/new"></app-empty-state>
       } @else {
         <table class="w-full">
-          <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+          <thead class="bg-gray-50 text-xs text-gray-500 uppercase tracking-wider dark:bg-gray-900 dark:text-gray-400">
             <tr>
               <th class="px-4 py-3 text-left">Titre</th>
               <th class="px-4 py-3 text-left">Catégorie</th>
@@ -58,22 +64,22 @@
               <th class="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
             @for (expense of expenses; track expense.id) {
-              <tr class="hover:bg-gray-50 transition">
+              <tr class="hover:bg-gray-50 transition dark:hover:bg-gray-700">
                 <td class="px-4 py-3">
                   <a [routerLink]="['/expenses', expense.id]"
-                    class="font-medium text-gray-800 hover:text-indigo-600">
+                    class="font-medium text-gray-800 hover:text-indigo-600 dark:text-gray-100">
                     {{ expense.title }}
                   </a>
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-500">
+                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                   {{ expense.category?.name ?? '—' }}
                 </td>
-                <td class="px-4 py-3 text-sm text-gray-500">
+                <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                   {{ expense.expenseDate | date:'dd/MM/yyyy' }}
                 </td>
-                <td class="px-4 py-3 text-right font-semibold text-gray-800">
+                <td class="px-4 py-3 text-right font-semibold text-gray-800 dark:text-gray-100">
                   {{ expense.amount | number:'1.2-2' }} {{ expense.currency }}
                 </td>
                 <td class="px-4 py-3 text-center">

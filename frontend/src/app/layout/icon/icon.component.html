@@ -58,5 +58,22 @@
       <path d="M3.5 12h17"></path>
       <path d="M12 3.5c2.5 2.3 3.8 5.3 3.8 8.5s-1.3 6.2-3.8 8.5c-2.5-2.3-3.8-5.3-3.8-8.5s1.3-6.2 3.8-8.5z"></path>
     }
+    @case ('inbox') {
+      <path d="M4 13V7a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6"></path>
+      <path d="M4 13h4.5l1.5 2.5h4l1.5-2.5H20"></path>
+      <path d="M4 13v4.5A1.5 1.5 0 0 0 5.5 19h13a1.5 1.5 0 0 0 1.5-1.5V13"></path>
+    }
+    @case ('alert') {
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 8v5"></path>
+      <circle cx="12" cy="16" r="0.75" fill="currentColor" stroke="none"></circle>
+    }
+    @case ('sun') {
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 3v1.5M12 19.5V21M4.9 4.9l1.1 1.1M18 18l1.1 1.1M3 12h1.5M19.5 12H21M4.9 19.1 6 18M18 6l1.1-1.1"></path>
+    }
+    @case ('moon') {
+      <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"></path>
+    }
   }
 </svg>

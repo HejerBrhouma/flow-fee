@@ -1,15 +1,15 @@
 <div class="relative">
   <button (click)="toggle()" type="button"
-    class="relative w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
+    class="relative w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition dark:text-gray-400 dark:hover:bg-gray-700"
     [title]="'common.language' | translate">
     <app-icon name="globe"></app-icon>
   </button>
 
   @if (open) {
-    <div class="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+    <div class="absolute right-0 rtl:right-auto rtl:left-0 mt-2 w-44 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 dark:bg-gray-800 dark:border-gray-700">
       @for (lang of languageService.languages; track lang.code) {
         <button (click)="select(lang.code)" type="button"
-          class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition"
+          class="w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition dark:hover:bg-gray-700"
           [class.text-indigo-600]="languageService.current === lang.code"
           [class.font-semibold]="languageService.current === lang.code"
           [class.text-gray-700]="languageService.current !== lang.code">

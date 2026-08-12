@@ -1,17 +1,17 @@
 <div class="p-6">
 
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-800">Rapports</h2>
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Rapports</h2>
 
     <form [formGroup]="filterForm" (ngSubmit)="load()" class="flex gap-3">
       <select formControlName="year"
-        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
         <option [value]="2024">2024</option>
         <option [value]="2025">2025</option>
         <option [value]="2026">2026</option>
       </select>
       <select formControlName="month"
-        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
         @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
           <option [value]="m">{{ months[m - 1] }}</option>
         }
@@ -24,22 +24,35 @@
   </div>
 
   @if (loading) {
-    <div class="flex justify-center py-12">
-      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @for (i of [1, 2]; track i) {
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
+          <app-skeleton-block width="40%" height="1rem" class="block mb-4"></app-skeleton-block>
+          <app-skeleton-block width="100%" height="14rem"></app-skeleton-block>
+        </div>
+      }
     </div>
   }
 
-  @if (!loading) {
+  @if (error) {
+    <app-error-state message="Impossible de charger les rapports." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error) {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <h3 class="text-base font-semibold text-gray-700 mb-4">Évolution annuelle</h3>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-base font-semibold text-gray-700 mb-4 dark:text-gray-200">Évolution annuelle</h3>
         <canvas baseChart [data]="trendChartData" type="line"></canvas>
       </div>
 
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-        <h3 class="text-base font-semibold text-gray-700 mb-4">Dépenses par catégorie</h3>
-        <canvas baseChart [data]="categoryChartData" type="bar"></canvas>
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-base font-semibold text-gray-700 mb-4 dark:text-gray-200">Dépenses par catégorie</h3>
+        @if (hasCategoryData) {
+          <canvas baseChart [data]="categoryChartData" type="bar"></canvas>
+        } @else {
+          <app-empty-state icon="reports" message="Aucune dépense sur cette période."></app-empty-state>
+        }
       </div>
     </div>
   }

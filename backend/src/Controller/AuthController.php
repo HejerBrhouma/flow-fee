@@ -3,6 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\BudgetRepository;
+use App\Repository\ExpenseRepository;
+use App\Repository\NotificationRepository;
+use App\Repository\SavingsGoalRepository;
+use App\Repository\UserCompanyRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
@@ -34,6 +39,11 @@ class AuthController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly StorageInterface $storage,
         private readonly RequestStack $requestStack,
+        private readonly BudgetRepository $budgetRepository,
+        private readonly SavingsGoalRepository $savingsGoalRepository,
+        private readonly ExpenseRepository $expenseRepository,
+        private readonly NotificationRepository $notificationRepository,
+        private readonly UserCompanyRepository $userCompanyRepository,
     ) {}
 
     /**
@@ -206,6 +216,92 @@ class AuthController extends AbstractController
         $this->em->flush();
 
         return $this->json(['message' => 'Mot de passe mis à jour.']);
+    }
+
+    /**
+     * RGPD data export: every piece of personal data this account owns, as a single JSON
+     * document the user can download. Deliberately excludes other users' data even where
+     * it's reachable (e.g. teammates in the same company) — only this account's own records.
+     */
+    #[Route('/me/export', name: 'export_data', methods: ['GET'])]
+    public function exportData(): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $data = [
+            'exportedAt' => (new \DateTime())->format(DATE_ATOM),
+            'profile' => $this->serializeUser($user),
+            'expenses' => json_decode($this->serializer->serialize(
+                $this->expenseRepository->findBy(['user' => $user]), 'json', ['groups' => ['expense:read']]
+            ), true),
+            'budgets' => json_decode($this->serializer->serialize(
+                $this->budgetRepository->findBy(['user' => $user]), 'json', ['groups' => ['budget:read']]
+            ), true),
+            'savingsGoals' => json_decode($this->serializer->serialize(
+                $this->savingsGoalRepository->findBy(['user' => $user]), 'json', ['groups' => ['savings_goal:read']]
+            ), true),
+            'notifications' => json_decode($this->serializer->serialize(
+                $this->notificationRepository->findBy(['user' => $user]), 'json', ['groups' => ['notification:read']]
+            ), true),
+            'companyMemberships' => json_decode($this->serializer->serialize(
+                $this->userCompanyRepository->findBy(['user' => $user]), 'json', ['groups' => ['team:read']]
+            ), true),
+        ];
+
+        $response = $this->json($data);
+        $response->headers->set('Content-Disposition', 'attachment; filename="flow-fee-donnees.json"');
+
+        return $response;
+    }
+
+    /**
+     * Account deletion. Most owned data cascades via orphanRemoval on the User entity
+     * (expenses, company memberships, notifications) — but Budget and SavingsGoal only hold
+     * a plain ManyToOne to User with no cascade configured, and Expense.reviewedBy is a
+     * second, separate User reference (the approving manager) that must not take a
+     * colleague's expense history down with it. Those three are cleaned up explicitly before
+     * removing the user row so the deletion doesn't hit a stale FK constraint.
+     */
+    #[Route('/me', name: 'delete_account', methods: ['DELETE'])]
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        if ($user->getPassword() && !$this->passwordHasher->isPasswordValid($user, $data['password'] ?? '')) {
+            return $this->json(['message' => 'Mot de passe incorrect.'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        foreach ($user->getUserCompanies() as $membership) {
+            if ($membership->getRole() !== \App\Entity\UserCompany::ROLE_ADMIN) {
+                continue;
+            }
+            $company = $membership->getCompany();
+            $otherMembers = $this->userCompanyRepository->count(['company' => $company]) - 1;
+            $otherAdmins = $this->userCompanyRepository->count(['company' => $company, 'role' => \App\Entity\UserCompany::ROLE_ADMIN]) - 1;
+            if ($otherMembers > 0 && $otherAdmins === 0) {
+                return $this->json([
+                    'message' => "Vous êtes l'unique administrateur d'une entreprise comptant d'autres membres. Désignez un autre administrateur avant de supprimer votre compte.",
+                ], Response::HTTP_CONFLICT);
+            }
+        }
+
+        foreach ($this->budgetRepository->findBy(['user' => $user]) as $budget) {
+            $this->em->remove($budget);
+        }
+        foreach ($this->savingsGoalRepository->findBy(['user' => $user]) as $goal) {
+            $this->em->remove($goal);
+        }
+        foreach ($this->expenseRepository->findBy(['reviewedBy' => $user]) as $reviewedExpense) {
+            $reviewedExpense->setReviewedBy(null);
+        }
+
+        $this->em->remove($user);
+        $this->em->flush();
+
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 
     #[Route('/oauth/google', name: 'oauth_google', methods: ['GET'])]

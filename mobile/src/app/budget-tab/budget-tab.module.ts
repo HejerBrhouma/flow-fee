@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BudgetTabPage } from './budget-tab.page';
+import { SharedModule } from '../shared/shared.module';
 
 import { BudgetTabPageRoutingModule } from './budget-tab-routing.module';
 
@@ -12,7 +13,8 @@ import { BudgetTabPageRoutingModule } from './budget-tab-routing.module';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    BudgetTabPageRoutingModule
+    BudgetTabPageRoutingModule,
+    SharedModule
   ],
   declarations: [BudgetTabPage]
 })

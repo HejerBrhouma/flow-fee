@@ -21,6 +21,7 @@ export class BudgetTabPage implements OnInit {
   // --- Budget ---
   budgets: BudgetConsumption[] = [];
   budgetsLoading = true;
+  budgetsError = false;
 
   readonly months = [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
@@ -32,6 +33,7 @@ export class BudgetTabPage implements OnInit {
   // --- Savings goals ---
   goals: SavingsGoal[] = [];
   goalsLoading = true;
+  goalsError = false;
   goalForm: FormGroup;
   contributingId: number | null = null;
   contributionAmount: number | null = null;
@@ -82,6 +84,7 @@ export class BudgetTabPage implements OnInit {
 
   loadBudgets(event?: CustomEvent): void {
     this.budgetsLoading = !event;
+    this.budgetsError = false;
 
     this.budgetService.getMyBudgets().subscribe({
       next: (budgets) => {
@@ -102,6 +105,7 @@ export class BudgetTabPage implements OnInit {
       },
       error: () => {
         this.budgetsLoading = false;
+        if (!event) this.budgetsError = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });
@@ -168,6 +172,7 @@ export class BudgetTabPage implements OnInit {
 
   loadGoals(event?: CustomEvent): void {
     this.goalsLoading = !event;
+    this.goalsError = false;
 
     this.savingsGoalService.getAll().subscribe({
       next: (goals) => {
@@ -177,6 +182,7 @@ export class BudgetTabPage implements OnInit {
       },
       error: () => {
         this.goalsLoading = false;
+        if (!event) this.goalsError = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });

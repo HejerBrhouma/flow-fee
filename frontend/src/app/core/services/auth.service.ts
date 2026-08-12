@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, switchMap, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, ChangePasswordPayload, LoginPayload, RegisterPayload, UpdateProfilePayload, User } from '../models/user.model';
+import { AuthResponse, ChangePasswordPayload, LoginPayload, LoginResult, RegisterPayload, UpdateProfilePayload, User } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -33,12 +33,48 @@ export class AuthService {
     );
   }
 
-  login(payload: LoginPayload): Observable<User> {
-    // login_check (handled natively by the JWT bundle) only ever returns { token },
-    // unlike /auth/register which returns { token, user } — so the user has to be
-    // fetched separately via /auth/me instead of trusting a "user" field that never comes back.
-    return this.http.post<{ token: string }>(`${environment.apiUrl}/auth/login_check`, payload).pipe(
+  login(payload: LoginPayload): Observable<LoginResult> {
+    // login_check (handled natively by the JWT bundle) normally only ever returns { token },
+    // unlike /auth/register which returns { token, user } — so the user has to be fetched
+    // separately via /auth/me instead of trusting a "user" field that never comes back.
+    // For an account with 2FA enabled, TwoFactorLoginListener swaps that response for
+    // { twoFactorRequired: true, challengeToken } instead — no token is issued until the
+    // code is verified via verifyTwoFactor().
+    return this.http.post<{ token?: string; twoFactorRequired?: boolean; challengeToken?: string }>(
+      `${environment.apiUrl}/auth/login_check`, payload
+    ).pipe(
+      switchMap(response => {
+        if (response.twoFactorRequired) {
+          return of<LoginResult>({ requiresTwoFactor: true, challengeToken: response.challengeToken! });
+        }
+
+        localStorage.setItem(this.TOKEN_KEY, response.token!);
+        return this.fetchCurrentUser().pipe(
+          map(user => ({ requiresTwoFactor: false, user }) as LoginResult),
+        );
+      }),
+    );
+  }
+
+  verifyTwoFactor(challengeToken: string, code: string): Observable<User> {
+    return this.http.post<{ token: string }>(`${environment.apiUrl}/auth/2fa/verify`, { challengeToken, code }).pipe(
       tap(response => localStorage.setItem(this.TOKEN_KEY, response.token)),
+      switchMap(() => this.fetchCurrentUser()),
+    );
+  }
+
+  setupTwoFactor(): Observable<{ secret: string; provisioningUri: string }> {
+    return this.http.post<{ secret: string; provisioningUri: string }>(`${environment.apiUrl}/auth/2fa/setup`, {});
+  }
+
+  enableTwoFactor(code: string): Observable<User> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/2fa/enable`, { code }).pipe(
+      switchMap(() => this.fetchCurrentUser()),
+    );
+  }
+
+  disableTwoFactor(password: string): Observable<User> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/2fa/disable`, { password }).pipe(
       switchMap(() => this.fetchCurrentUser()),
     );
   }
@@ -128,6 +164,14 @@ export class AuthService {
 
   changePassword(payload: ChangePasswordPayload): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/me/password`, payload);
+  }
+
+  exportData(): Observable<Blob> {
+    return this.http.get(`${environment.apiUrl}/auth/me/export`, { responseType: 'blob' });
+  }
+
+  deleteAccount(password: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/auth/me`, { body: { password } });
   }
 
   logout(): void {

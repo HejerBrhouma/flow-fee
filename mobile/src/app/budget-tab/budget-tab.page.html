@@ -65,19 +65,28 @@
       }
 
       @if (budgetsLoading) {
-        <div class="ion-text-center ion-padding">
-          <ion-spinner></ion-spinner>
-        </div>
+        @for (i of [1, 2]; track i) {
+          <ion-card class="finance-card">
+            <ion-card-content>
+              <app-skeleton-block width="40%" height="0.75rem" class="ion-margin-bottom"></app-skeleton-block>
+              <app-skeleton-block width="60%" height="1.25rem"></app-skeleton-block>
+            </ion-card-content>
+          </ion-card>
+        }
       }
 
-      @if (!budgetsLoading && budgets.length === 0) {
+      @if (budgetsError) {
+        <app-error-state message="Impossible de charger vos budgets." (retry)="loadBudgets()"></app-error-state>
+      }
+
+      @if (!budgetsLoading && !budgetsError && budgets.length === 0) {
         <div class="empty-state ion-text-center ion-padding">
           <ion-icon name="pie-chart-outline"></ion-icon>
           <p>Aucun budget personnel défini pour l'instant.</p>
         </div>
       }
 
-      @if (!budgetsLoading) {
+      @if (!budgetsLoading && !budgetsError) {
         @for (item of budgets; track item.budget.id) {
           <ion-card class="finance-card">
             <ion-card-content>
@@ -95,13 +104,15 @@
                 [color]="barColor(item.percentage)"></ion-progress-bar>
 
               <div class="finance-footer">
-                <span>{{ item.spent | number:'1.2-2' }} € dépensés</span>
+                <span>{{ item.spent | number:'1.2-2' }} {{ item.budget.currency }} dépensés</span>
                 <span [class.danger-text]="item.percentage >= 100" [class.warning-text]="item.percentage >= 90 && item.percentage < 100">
                   {{ item.percentage }}%
                 </span>
               </div>
               <p class="remaining-label">
-                {{ item.remaining >= 0 ? (item.remaining | number:'1.2-2') + ' € restants' : 'Dépassé de ' + (-item.remaining | number:'1.2-2') + ' €' }}
+                {{ item.remaining >= 0
+                  ? (item.remaining | number:'1.2-2') + ' ' + item.budget.currency + ' restants'
+                  : 'Dépassé de ' + (-item.remaining | number:'1.2-2') + ' ' + item.budget.currency }}
               </p>
             </ion-card-content>
           </ion-card>
@@ -139,19 +150,28 @@
       }
 
       @if (goalsLoading) {
-        <div class="ion-text-center ion-padding">
-          <ion-spinner></ion-spinner>
-        </div>
+        @for (i of [1, 2]; track i) {
+          <ion-card class="finance-card">
+            <ion-card-content>
+              <app-skeleton-block width="40%" height="0.75rem" class="ion-margin-bottom"></app-skeleton-block>
+              <app-skeleton-block width="60%" height="1.25rem"></app-skeleton-block>
+            </ion-card-content>
+          </ion-card>
+        }
       }
 
-      @if (!goalsLoading && goals.length === 0) {
+      @if (goalsError) {
+        <app-error-state message="Impossible de charger vos objectifs d'épargne." (retry)="loadGoals()"></app-error-state>
+      }
+
+      @if (!goalsLoading && !goalsError && goals.length === 0) {
         <div class="empty-state ion-text-center ion-padding">
           <ion-icon name="flag-outline"></ion-icon>
           <p>Aucun objectif d'épargne pour l'instant.</p>
         </div>
       }
 
-      @if (!goalsLoading) {
+      @if (!goalsLoading && !goalsError) {
         @for (goal of goals; track goal.id) {
           <ion-card class="finance-card">
             <ion-card-content>

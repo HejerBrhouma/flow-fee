@@ -12,6 +12,11 @@ export class LoginComponent {
   form: FormGroup;
   loading = false;
 
+  awaitingTwoFactor = false;
+  verifyingTwoFactor = false;
+  twoFactorCode = '';
+  private challengeToken = '';
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -29,10 +34,36 @@ export class LoginComponent {
     this.loading = true;
 
     this.authService.login(this.form.value).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: (result) => {
+        this.loading = false;
+        if (result.requiresTwoFactor) {
+          this.challengeToken = result.challengeToken;
+          this.awaitingTwoFactor = true;
+          return;
+        }
+        this.router.navigate(['/dashboard']);
+      },
       error: (err) => {
         this.loading = false;
         this.toastr.error(err.error?.message ?? 'Email ou mot de passe incorrect.');
+      },
+    });
+  }
+
+  cancelTwoFactor(): void {
+    this.awaitingTwoFactor = false;
+    this.twoFactorCode = '';
+  }
+
+  submitTwoFactor(): void {
+    if (!this.twoFactorCode) return;
+    this.verifyingTwoFactor = true;
+
+    this.authService.verifyTwoFactor(this.challengeToken, this.twoFactorCode).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: (err) => {
+        this.verifyingTwoFactor = false;
+        this.toastr.error(err.error?.message ?? 'Code invalide.');
       },
     });
   }

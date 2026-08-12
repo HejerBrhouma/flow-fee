@@ -10,6 +10,8 @@ import { DashboardService } from '../../core/services/dashboard.service';
 export class ReportsComponent implements OnInit {
   filterForm: FormGroup;
   loading = false;
+  error = false;
+  hasCategoryData = false;
 
   trendChartData: ChartData<'line'> = { labels: [], datasets: [] };
   categoryChartData: ChartData<'bar'> = { labels: [], datasets: [] };
@@ -33,10 +35,12 @@ export class ReportsComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.error = false;
     const { year, month } = this.filterForm.value;
 
     this.dashboardService.getStats(year, month).subscribe({
       next: (stats) => {
+        this.hasCategoryData = stats.monthlyByCategory.length > 0;
         this.trendChartData = {
           labels: stats.monthlyTrend.map(m => this.months[m.month - 1]),
           datasets: [{
@@ -61,7 +65,7 @@ export class ReportsComponent implements OnInit {
 
         this.loading = false;
       },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 }

@@ -11,6 +11,7 @@ import { DashboardStats } from '../../core/models/company.model';
 export class DashboardComponent implements OnInit {
   stats: DashboardStats | null = null;
   loading = true;
+  error = false;
 
   readonly months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
@@ -28,13 +29,22 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.error = false;
     this.dashboardService.getStats().subscribe({
       next: (stats) => {
         this.stats = stats;
         this.buildCharts(stats);
         this.loading = false;
       },
-      error: () => { this.loading = false; },
+      error: () => {
+        this.loading = false;
+        this.error = true;
+      },
     });
   }
 

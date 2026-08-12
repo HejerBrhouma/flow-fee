@@ -16,8 +16,10 @@ const ALLOWED_RECEIPT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'applica
 export class ExpenseDetailComponent implements OnInit {
   expense: Expense | null = null;
   loading = true;
+  error = false;
   reviewComment = '';
   uploading = false;
+  private expenseId!: number;
 
   readonly statusLabels: Record<ExpenseStatus, string> = {
     draft: 'Brouillon',
@@ -34,10 +36,16 @@ export class ExpenseDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = +this.route.snapshot.params['id'];
-    this.expenseService.getById(id).subscribe({
+    this.expenseId = +this.route.snapshot.params['id'];
+    this.load();
+  }
+
+  load(): void {
+    this.loading = true;
+    this.error = false;
+    this.expenseService.getById(this.expenseId).subscribe({
       next: (expense) => { this.expense = expense; this.loading = false; },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 

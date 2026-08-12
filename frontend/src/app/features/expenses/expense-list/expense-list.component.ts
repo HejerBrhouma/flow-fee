@@ -14,6 +14,7 @@ export class ExpenseListComponent implements OnInit {
   page = 1;
   pages = 1;
   loading = true;
+  error = false;
 
   filterForm: FormGroup;
 
@@ -49,6 +50,7 @@ export class ExpenseListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.error = false;
     const filters: ExpenseFilters = {
       ...this.filterForm.value,
       page: this.page,
@@ -61,7 +63,10 @@ export class ExpenseListComponent implements OnInit {
         this.pages = res.pages;
         this.loading = false;
       },
-      error: () => { this.loading = false; },
+      error: () => {
+        this.loading = false;
+        this.error = true;
+      },
     });
   }
 

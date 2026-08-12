@@ -16,6 +16,19 @@ export class ProfileComponent {
   uploadingAvatar = false;
   changingPassword = false;
   savingPassword = false;
+  exporting = false;
+  showDeleteConfirm = false;
+  deleting = false;
+  deletePassword = '';
+  deleteError = '';
+
+  settingUpTwoFactor = false;
+  twoFactorSecret = '';
+  twoFactorCode = '';
+  enablingTwoFactor = false;
+  showDisableTwoFactor = false;
+  disableTwoFactorPassword = '';
+  disablingTwoFactor = false;
 
   form: FormGroup;
   passwordForm: FormGroup;
@@ -138,6 +151,113 @@ export class ProfileComponent {
       error: (err) => {
         this.savingPassword = false;
         this.toastr.error(err.error?.message ?? 'Impossible de changer le mot de passe.');
+      },
+    });
+  }
+
+  exportData(): void {
+    this.exporting = true;
+    this.authService.exportData().subscribe({
+      next: (blob) => {
+        this.exporting = false;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'flow-fee-donnees.json';
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => {
+        this.exporting = false;
+        this.toastr.error('Impossible d\'exporter vos données.');
+      },
+    });
+  }
+
+  startDeleteAccount(): void {
+    this.deletePassword = '';
+    this.deleteError = '';
+    this.showDeleteConfirm = true;
+  }
+
+  cancelDeleteAccount(): void {
+    this.showDeleteConfirm = false;
+  }
+
+  confirmDeleteAccount(): void {
+    this.deleting = true;
+    this.deleteError = '';
+
+    this.authService.deleteAccount(this.deletePassword).subscribe({
+      next: () => {
+        this.toastr.success('Votre compte a été supprimé.');
+        this.authService.logout();
+      },
+      error: (err) => {
+        this.deleting = false;
+        this.deleteError = err.error?.message ?? 'Impossible de supprimer le compte.';
+      },
+    });
+  }
+
+  startTwoFactorSetup(): void {
+    this.settingUpTwoFactor = true;
+    this.twoFactorCode = '';
+    this.authService.setupTwoFactor().subscribe({
+      next: (res) => { this.twoFactorSecret = res.secret; },
+      error: () => {
+        this.settingUpTwoFactor = false;
+        this.toastr.error('Impossible de démarrer la configuration.');
+      },
+    });
+  }
+
+  cancelTwoFactorSetup(): void {
+    this.settingUpTwoFactor = false;
+    this.twoFactorSecret = '';
+    this.twoFactorCode = '';
+  }
+
+  confirmTwoFactorSetup(): void {
+    if (!this.twoFactorCode) return;
+    this.enablingTwoFactor = true;
+
+    this.authService.enableTwoFactor(this.twoFactorCode).subscribe({
+      next: () => {
+        this.enablingTwoFactor = false;
+        this.settingUpTwoFactor = false;
+        this.twoFactorSecret = '';
+        this.twoFactorCode = '';
+        this.toastr.success('Double authentification activée.');
+      },
+      error: (err) => {
+        this.enablingTwoFactor = false;
+        this.toastr.error(err.error?.message ?? 'Code invalide.');
+      },
+    });
+  }
+
+  startDisableTwoFactor(): void {
+    this.showDisableTwoFactor = true;
+    this.disableTwoFactorPassword = '';
+  }
+
+  cancelDisableTwoFactor(): void {
+    this.showDisableTwoFactor = false;
+  }
+
+  confirmDisableTwoFactor(): void {
+    this.disablingTwoFactor = true;
+
+    this.authService.disableTwoFactor(this.disableTwoFactorPassword).subscribe({
+      next: () => {
+        this.disablingTwoFactor = false;
+        this.showDisableTwoFactor = false;
+        this.toastr.success('Double authentification désactivée.');
+      },
+      error: (err) => {
+        this.disablingTwoFactor = false;
+        this.toastr.error(err.error?.message ?? 'Impossible de désactiver la double authentification.');
       },
     });
   }

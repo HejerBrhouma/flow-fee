@@ -95,3 +95,16 @@
   font-weight: 600;
   margin: 0 0 12px;
 }
+
+.two-factor-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.enabled-label {
+  color: var(--ion-color-success);
+  font-weight: 600;
+  font-size: 14px;
+}

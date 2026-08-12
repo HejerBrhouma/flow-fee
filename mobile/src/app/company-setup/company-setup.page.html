@@ -16,9 +16,30 @@
         <ion-item>
           <ion-input label="Nom de l'entreprise *" labelPlacement="stacked" placeholder="Ma Société SAS" formControlName="name"></ion-input>
         </ion-item>
+
         <ion-item>
-          <ion-input label="SIRET" labelPlacement="stacked" placeholder="12345678901234" formControlName="siret"></ion-input>
+          <ion-select label="Pays *" labelPlacement="stacked" formControlName="country" interface="popover">
+            @for (c of countries; track c) {
+              <ion-select-option [value]="c">{{ c }}</ion-select-option>
+            }
+          </ion-select>
         </ion-item>
+
+        @if (taxIdRule) {
+          <ion-item>
+            <ion-input [label]="taxIdRule.label + ' *'" labelPlacement="stacked" [placeholder]="taxIdRule.placeholder"
+              [formControlName]="taxIdRule.field"></ion-input>
+          </ion-item>
+          <p class="hint">{{ taxIdRule.hint }}</p>
+        } @else {
+          <ion-item>
+            <ion-input label="SIRET" labelPlacement="stacked" formControlName="siret"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-input label="Numéro d'identification fiscale" labelPlacement="stacked" formControlName="taxId"></ion-input>
+          </ion-item>
+        }
+
         <ion-item>
           <ion-input label="Adresse" labelPlacement="stacked" formControlName="address"></ion-input>
         </ion-item>
@@ -30,7 +51,15 @@
         </ion-item>
       </ion-list>
 
-      <ion-button expand="block" type="submit" [disabled]="loading || form.invalid" class="ion-margin-top">
+      @if (addressCheck === 'checking') {
+        <p class="hint">Vérification de l'adresse...</p>
+      } @else if (addressCheck === 'valid') {
+        <p class="hint hint-valid">✓ Adresse vérifiée.</p>
+      } @else if (addressCheck === 'invalid') {
+        <p class="hint hint-invalid">Ce code postal ne semble pas correspondre à cette ville pour ce pays.</p>
+      }
+
+      <ion-button expand="block" type="submit" [disabled]="loading || form.invalid || addressCheck === 'invalid'" class="ion-margin-top">
         {{ loading ? 'Création...' : 'Créer l\'entreprise' }}
       </ion-button>
     </form>

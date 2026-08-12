@@ -1,6 +1,6 @@
 <div class="relative">
   <button (click)="toggle()" type="button"
-    class="relative w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition">
+    class="relative w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition dark:text-gray-400 dark:hover:bg-gray-700">
     <span class="text-lg">🔔</span>
     @if (unreadCount > 0) {
       <span
@@ -11,9 +11,9 @@
   </button>
 
   @if (open) {
-    <div class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <p class="font-semibold text-gray-800 text-sm">Notifications</p>
+    <div class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 dark:bg-gray-800 dark:border-gray-700">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+        <p class="font-semibold text-gray-800 text-sm dark:text-gray-100">Notifications</p>
         @if (unreadCount > 0) {
           <button (click)="markAllRead($event)" type="button"
             class="text-xs font-medium text-indigo-600 hover:text-indigo-700">
@@ -24,20 +24,20 @@
 
       <div class="max-h-96 overflow-y-auto">
         @if (loading) {
-          <p class="px-4 py-6 text-center text-sm text-gray-400">Chargement…</p>
+          <p class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Chargement…</p>
         } @else if (notifications.length === 0) {
-          <p class="px-4 py-6 text-center text-sm text-gray-400">Aucune notification.</p>
+          <p class="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Aucune notification.</p>
         } @else {
           @for (notification of notifications; track notification.id) {
             <button (click)="select(notification)" type="button"
-              class="w-full flex items-start gap-3 px-4 py-3 text-left border-b border-gray-50 last:border-0 hover:bg-gray-50 transition"
+              class="w-full flex items-start gap-3 px-4 py-3 text-left border-b border-gray-50 last:border-0 hover:bg-gray-50 transition dark:hover:bg-gray-700"
               [class.bg-indigo-50]="!notification.isRead">
               <span class="text-lg shrink-0">{{ icons[notification.type] }}</span>
               <span class="flex-1 min-w-0">
-                <span class="block text-sm text-gray-700" [class.font-semibold]="!notification.isRead">
+                <span class="block text-sm text-gray-700 dark:text-gray-200" [class.font-semibold]="!notification.isRead">
                   {{ notification.message }}
                 </span>
-                <span class="block text-xs text-gray-400 mt-0.5">{{ timeAgo(notification.createdAt) }}</span>
+                <span class="block text-xs text-gray-400 mt-0.5 dark:text-gray-500">{{ timeAgo(notification.createdAt) }}</span>
               </span>
               @if (!notification.isRead) {
                 <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-1.5"></span>

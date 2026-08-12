@@ -14,6 +14,11 @@ export class LoginPage {
   form: FormGroup;
   loading = false;
 
+  awaitingTwoFactor = false;
+  verifyingTwoFactor = false;
+  twoFactorCode = '';
+  private challengeToken = '';
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -31,11 +36,43 @@ export class LoginPage {
     this.loading = true;
 
     this.authService.login(this.form.value).subscribe({
-      next: () => this.router.navigateByUrl('/tabs/dashboard'),
+      next: (result) => {
+        this.loading = false;
+        if (result.requiresTwoFactor) {
+          this.challengeToken = result.challengeToken;
+          this.awaitingTwoFactor = true;
+          return;
+        }
+        this.router.navigateByUrl('/tabs/dashboard');
+      },
       error: async (err) => {
         this.loading = false;
         const toast = await this.toastController.create({
           message: err.error?.message ?? 'Email ou mot de passe incorrect.',
+          duration: 3000,
+          color: 'danger',
+          position: 'top',
+        });
+        await toast.present();
+      },
+    });
+  }
+
+  cancelTwoFactor(): void {
+    this.awaitingTwoFactor = false;
+    this.twoFactorCode = '';
+  }
+
+  submitTwoFactor(): void {
+    if (!this.twoFactorCode) return;
+    this.verifyingTwoFactor = true;
+
+    this.authService.verifyTwoFactor(this.challengeToken, this.twoFactorCode).subscribe({
+      next: () => this.router.navigateByUrl('/tabs/dashboard'),
+      error: async (err) => {
+        this.verifyingTwoFactor = false;
+        const toast = await this.toastController.create({
+          message: err.error?.message ?? 'Code invalide.',
           duration: 3000,
           color: 'danger',
           position: 'top',

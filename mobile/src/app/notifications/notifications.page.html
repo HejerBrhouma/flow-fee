@@ -15,31 +15,43 @@
   </ion-refresher>
 
   @if (loading) {
-    <div class="ion-text-center ion-padding">
-      <ion-spinner></ion-spinner>
+    <div class="notification-list ion-padding-horizontal">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="notification-card">
+          <app-skeleton-block width="2.5rem" height="2.5rem" radius="50%"></app-skeleton-block>
+          <app-skeleton-block width="70%" height="0.875rem"></app-skeleton-block>
+        </div>
+      }
     </div>
   }
 
-  @if (!loading && notifications.length === 0) {
+  @if (error) {
+    <app-error-state message="Impossible de charger les notifications." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error && notifications.length === 0) {
     <div class="empty-state ion-text-center ion-padding">
+      <ion-icon name="notifications-outline"></ion-icon>
       <p>Aucune notification.</p>
     </div>
   }
 
-  @if (!loading) {
-    <ion-list>
+  @if (!loading && !error) {
+    <div class="notification-list ion-padding-horizontal">
       @for (notification of notifications; track notification.id) {
-        <ion-item button (click)="select(notification)" [class.unread]="!notification.isRead">
-          <ion-icon [name]="icons[notification.type]" slot="start"></ion-icon>
-          <ion-label class="ion-text-wrap">
+        <div class="notification-card" [class.unread]="!notification.isRead" (click)="select(notification)">
+          <div class="notif-icon" [class]="'color-' + colors[notification.type]">
+            <ion-icon [name]="icons[notification.type]"></ion-icon>
+          </div>
+          <div class="notif-content">
             <p class="message" [class.font-semibold]="!notification.isRead">{{ notification.message }}</p>
             <p class="time">{{ timeAgo(notification.createdAt) }}</p>
-          </ion-label>
+          </div>
           @if (!notification.isRead) {
-            <ion-badge slot="end" color="primary"></ion-badge>
+            <span class="unread-dot"></span>
           }
-        </ion-item>
+        </div>
       }
-    </ion-list>
+    </div>
   }
 </ion-content>

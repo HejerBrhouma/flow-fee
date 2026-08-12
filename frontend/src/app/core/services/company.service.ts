@@ -41,4 +41,10 @@ export class CompanyService {
   removeMember(companyId: number, memberId: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${companyId}/team/${memberId}`);
   }
+
+  verifyAddress(country: string, city: string, zipCode: string): Observable<{ valid: boolean | null }> {
+    return this.http.get<{ valid: boolean | null }>(`${this.url}/verify-address`, {
+      params: { country, city, zipCode },
+    });
+  }
 }

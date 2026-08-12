@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Browser } from '@capacitor/browser';
 import { AuthService } from '../core/services/auth.service';
+import { ThemeService, AppTheme } from '../core/services/theme.service';
 import { CompanyService } from '../core/services/company.service';
 import { UserCompany } from '../core/models/company.model';
 
@@ -20,6 +22,10 @@ export class ProfilePage implements OnInit {
   uploadingAvatar = false;
   changingPassword = false;
   savingPassword = false;
+  exporting = false;
+  deleting = false;
+  settingUpTwoFactor = false;
+  disablingTwoFactor = false;
   membership: UserCompany | null = null;
   membershipLoading = true;
 
@@ -35,6 +41,7 @@ export class ProfilePage implements OnInit {
 
   constructor(
     public authService: AuthService,
+    public themeService: ThemeService,
     private companyService: CompanyService,
     private fb: FormBuilder,
     private alertController: AlertController,
@@ -174,6 +181,113 @@ export class ProfilePage implements OnInit {
       ],
     });
     await alert.present();
+  }
+
+  exportData(): void {
+    this.exporting = true;
+    this.authService.exportData().subscribe({
+      next: async (json) => {
+        this.exporting = false;
+        await Browser.open({ url: 'data:application/json;charset=utf-8,' + encodeURIComponent(json) });
+      },
+      error: async () => {
+        this.exporting = false;
+        await this.toast('Impossible d\'exporter vos données.', 'danger');
+      },
+    });
+  }
+
+  async confirmDeleteAccount(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Supprimer votre compte ?',
+      message: 'Cette action est définitive et effacera toutes vos données personnelles. Confirmez votre mot de passe.',
+      inputs: [{ name: 'password', type: 'password', placeholder: 'Mot de passe' }],
+      buttons: [
+        { text: 'Annuler', role: 'cancel' },
+        {
+          text: 'Supprimer',
+          role: 'destructive',
+          handler: (data) => this.deleteAccount(data.password ?? ''),
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private deleteAccount(password: string): void {
+    this.deleting = true;
+    this.authService.deleteAccount(password).subscribe({
+      next: async () => {
+        this.deleting = false;
+        await this.toast('Votre compte a été supprimé.', 'success');
+        this.authService.logout();
+      },
+      error: async (err) => {
+        this.deleting = false;
+        await this.toast(err.error?.message ?? 'Impossible de supprimer le compte.', 'danger');
+      },
+    });
+  }
+
+  setTheme(event: CustomEvent): void {
+    this.themeService.set(event.detail.value as AppTheme);
+  }
+
+  async startTwoFactorSetup(): Promise<void> {
+    this.settingUpTwoFactor = true;
+    this.authService.setupTwoFactor().subscribe({
+      next: async (res) => {
+        this.settingUpTwoFactor = false;
+        const alert = await this.alertController.create({
+          header: 'Activer la double authentification',
+          message: `Ajoutez cette clé dans votre application d'authentification (Google Authenticator, Authy...), puis entrez le code généré :\n\n${res.secret}`,
+          inputs: [{ name: 'code', type: 'text', placeholder: 'Code à 6 chiffres' }],
+          buttons: [
+            { text: 'Annuler', role: 'cancel' },
+            { text: 'Activer', handler: (data) => this.enableTwoFactor(data.code ?? '') },
+          ],
+        });
+        await alert.present();
+      },
+      error: async () => {
+        this.settingUpTwoFactor = false;
+        await this.toast('Impossible de démarrer la configuration.', 'danger');
+      },
+    });
+  }
+
+  private enableTwoFactor(code: string): void {
+    this.authService.enableTwoFactor(code).subscribe({
+      next: async () => this.toast('Double authentification activée.', 'success'),
+      error: async (err) => this.toast(err.error?.message ?? 'Code invalide.', 'danger'),
+    });
+  }
+
+  async confirmDisableTwoFactor(): Promise<void> {
+    const alert = await this.alertController.create({
+      header: 'Désactiver la double authentification ?',
+      message: 'Confirmez votre mot de passe.',
+      inputs: [{ name: 'password', type: 'password', placeholder: 'Mot de passe' }],
+      buttons: [
+        { text: 'Annuler', role: 'cancel' },
+        { text: 'Désactiver', role: 'destructive', handler: (data) => this.disableTwoFactor(data.password ?? '') },
+      ],
+    });
+    await alert.present();
+  }
+
+  private disableTwoFactor(password: string): void {
+    this.disablingTwoFactor = true;
+    this.authService.disableTwoFactor(password).subscribe({
+      next: async () => {
+        this.disablingTwoFactor = false;
+        await this.toast('Double authentification désactivée.', 'success');
+      },
+      error: async (err) => {
+        this.disablingTwoFactor = false;
+        await this.toast(err.error?.message ?? 'Impossible de désactiver la double authentification.', 'danger');
+      },
+    });
   }
 
   private async toast(message: string, color: 'success' | 'danger'): Promise<void> {

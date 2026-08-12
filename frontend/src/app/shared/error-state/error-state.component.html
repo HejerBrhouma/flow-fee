@@ -1,0 +1,8 @@
+<div class="flex flex-col items-center text-center py-12">
+  <app-icon name="alert" class="mb-3 text-red-300"></app-icon>
+  <p class="text-sm text-gray-500 dark:text-gray-400">{{ message }}</p>
+  <button type="button" (click)="retry.emit()"
+    class="mt-3 text-indigo-600 text-sm font-medium hover:underline">
+    Réessayer
+  </button>
+</div>

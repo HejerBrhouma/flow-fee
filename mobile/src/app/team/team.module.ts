@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TeamPage } from './team.page';
+import { SharedModule } from '../shared/shared.module';
 
 import { TeamPageRoutingModule } from './team-routing.module';
 
@@ -12,7 +13,8 @@ import { TeamPageRoutingModule } from './team-routing.module';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    TeamPageRoutingModule
+    TeamPageRoutingModule,
+    SharedModule
   ],
   declarations: [TeamPage]
 })

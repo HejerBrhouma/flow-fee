@@ -7,10 +7,11 @@ import { NotificationBellComponent } from './notification-bell/notification-bell
 import { IconComponent } from './icon/icon.component';
 import { AccountMenuComponent } from './account-menu/account-menu.component';
 import { LanguageSwitcherComponent } from './language-switcher/language-switcher.component';
+import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
 
 @NgModule({
-  declarations: [ShellComponent, NotificationBellComponent, IconComponent, AccountMenuComponent, LanguageSwitcherComponent],
+  declarations: [ShellComponent, NotificationBellComponent, IconComponent, AccountMenuComponent, LanguageSwitcherComponent, ThemeToggleComponent],
   imports: [CommonModule, RouterModule, TranslateModule],
-  exports: [ShellComponent],
+  exports: [ShellComponent, IconComponent],
 })
 export class LayoutModule {}

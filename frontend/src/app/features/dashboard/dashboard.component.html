@@ -1,41 +1,60 @@
 <div class="p-6">
-  <h2 class="text-2xl font-bold text-gray-800 mb-6">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 dark:text-gray-100">
     {{ 'dashboard.greeting' | translate:{ name: authService.currentUser?.firstName } }} 👋
   </h2>
 
   @if (loading) {
-    <div class="flex justify-center py-12">
-      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+          <app-skeleton-block width="60%" height="0.875rem"></app-skeleton-block>
+          <app-skeleton-block width="80%" height="1.75rem" class="block mt-3"></app-skeleton-block>
+        </div>
+      }
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <app-skeleton-block width="40%" height="1rem" class="block mb-4"></app-skeleton-block>
+        <app-skeleton-block width="100%" height="12rem"></app-skeleton-block>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <app-skeleton-block width="60%" height="1rem" class="block mb-4"></app-skeleton-block>
+        <app-skeleton-block width="100%" height="12rem"></app-skeleton-block>
+      </div>
     </div>
   }
 
-  @if (!loading && stats) {
+  @if (error) {
+    <app-error-state message="Impossible de charger le tableau de bord." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error && stats) {
     <!-- KPI cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-        <p class="text-sm text-gray-500">{{ 'dashboard.monthlyExpenses' | translate }}</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">
+      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'dashboard.monthlyExpenses' | translate }}</p>
+        <p class="text-2xl font-bold text-gray-800 mt-1 dark:text-gray-100">
           {{ stats.monthlyTotal | number:'1.2-2' }} {{ stats.currency }}
         </p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-        <p class="text-sm text-gray-500">{{ 'dashboard.yearlyExpenses' | translate }}</p>
-        <p class="text-2xl font-bold text-gray-800 mt-1">
+      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'dashboard.yearlyExpenses' | translate }}</p>
+        <p class="text-2xl font-bold text-gray-800 mt-1 dark:text-gray-100">
           {{ stats.yearlyTotal | number:'1.2-2' }} {{ stats.currency }}
         </p>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-        <p class="text-sm text-gray-500">{{ 'dashboard.pendingValidation' | translate }}</p>
+      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'dashboard.pendingValidation' | translate }}</p>
         <p class="text-2xl font-bold text-amber-500 mt-1">{{ stats.pendingCount }}</p>
       </div>
 
       <div class="bg-indigo-600 rounded-xl shadow-sm p-5 text-white">
         <p class="text-sm text-indigo-200">{{ 'dashboard.addExpense' | translate }}</p>
         <a routerLink="/expenses/new"
-          class="mt-2 inline-block bg-white text-indigo-600 rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-indigo-50 transition">
+          class="mt-2 inline-block bg-white text-indigo-600 rounded-lg px-4 py-1.5 text-sm font-medium hover:bg-indigo-50 transition dark:bg-gray-800">
           {{ 'dashboard.new' | translate }}
         </a>
       </div>
@@ -44,8 +63,8 @@
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-        <h3 class="text-base font-semibold text-gray-700 mb-4">{{ 'dashboard.monthlyTrend' | translate }}</h3>
+      <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-base font-semibold text-gray-700 mb-4 dark:text-gray-200">{{ 'dashboard.monthlyTrend' | translate }}</h3>
         <canvas baseChart
           [data]="trendChartData"
           [options]="chartOptions"
@@ -53,15 +72,15 @@
         </canvas>
       </div>
 
-      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-        <h3 class="text-base font-semibold text-gray-700 mb-4">{{ 'dashboard.byCategory' | translate }}</h3>
+      <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+        <h3 class="text-base font-semibold text-gray-700 mb-4 dark:text-gray-200">{{ 'dashboard.byCategory' | translate }}</h3>
         @if (stats.monthlyByCategory.length > 0) {
           <canvas baseChart
             [data]="categoryChartData"
             type="doughnut">
           </canvas>
         } @else {
-          <p class="text-gray-400 text-sm text-center py-8">{{ 'dashboard.noDataThisMonth' | translate }}</p>
+          <p class="text-gray-400 text-sm text-center py-8 dark:text-gray-500">{{ 'dashboard.noDataThisMonth' | translate }}</p>
         }
       </div>
     </div>

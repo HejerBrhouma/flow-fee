@@ -12,7 +12,11 @@ export type IconName =
   | 'settings'
   | 'profile'
   | 'chevron'
-  | 'globe';
+  | 'globe'
+  | 'inbox'
+  | 'alert'
+  | 'sun'
+  | 'moon';
 
 @Component({
   selector: 'app-icon',

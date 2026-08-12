@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
+import { SharedModule } from '../../shared/shared.module';
 
 import { ReportsComponent } from './reports.component';
 
@@ -12,6 +13,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [ReportsComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes), BaseChartDirective],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes), BaseChartDirective, SharedModule],
 })
 export class ReportsModule {}

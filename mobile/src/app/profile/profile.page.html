@@ -95,6 +95,21 @@
         }
       </div>
 
+      <!-- Appearance -->
+      <div class="account-card">
+        <h3>Apparence</h3>
+        <ion-segment [value]="themeService.current" (ionChange)="setTheme($event)">
+          <ion-segment-button value="light">
+            <ion-icon name="sunny-outline"></ion-icon>
+            <ion-label>Clair</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="dark">
+            <ion-icon name="moon-outline"></ion-icon>
+            <ion-label>Sombre</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </div>
+
       <!-- Security -->
       <div class="account-card">
         <h3>Sécurité</h3>
@@ -102,6 +117,9 @@
         @if (!changingPassword) {
           <ion-button expand="block" fill="outline" (click)="startChangingPassword()">
             Changer le mot de passe
+          </ion-button>
+          <ion-button expand="block" fill="outline" class="ion-margin-top" [disabled]="exporting" (click)="exportData()">
+            {{ exporting ? 'Export en cours...' : 'Exporter mes données' }}
           </ion-button>
         } @else {
           <form [formGroup]="passwordForm" (ngSubmit)="savePassword()">
@@ -122,6 +140,25 @@
               <ion-button expand="block" fill="outline" color="medium" (click)="cancelChangingPassword()">Annuler</ion-button>
             </div>
           </form>
+        }
+      </div>
+
+      <!-- Two-factor authentication -->
+      <div class="account-card">
+        <h3>Double authentification</h3>
+        <p class="hint">Protégez votre compte avec un code généré par une application d'authentification.</p>
+
+        @if (authService.currentUser?.twoFactorEnabled) {
+          <div class="two-factor-status">
+            <span class="enabled-label">✓ Activée</span>
+            <ion-button fill="outline" color="danger" size="small" [disabled]="disablingTwoFactor" (click)="confirmDisableTwoFactor()">
+              Désactiver
+            </ion-button>
+          </div>
+        } @else {
+          <ion-button expand="block" fill="outline" [disabled]="settingUpTwoFactor" (click)="startTwoFactorSetup()">
+            {{ settingUpTwoFactor ? 'Chargement...' : 'Activer la double authentification' }}
+          </ion-button>
         }
       </div>
 
@@ -152,6 +189,14 @@
         <ion-item button (click)="confirmLogout()" detail="false">
           <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
           <ion-label color="danger">Se déconnecter</ion-label>
+        </ion-item>
+      </ion-list>
+
+      <!-- Danger zone -->
+      <ion-list class="ion-margin-top" inset="true">
+        <ion-item button (click)="confirmDeleteAccount()" detail="false" [disabled]="deleting">
+          <ion-icon name="trash-outline" slot="start" color="danger"></ion-icon>
+          <ion-label color="danger">{{ deleting ? 'Suppression...' : 'Supprimer mon compte' }}</ion-label>
         </ion-item>
       </ion-list>
     }

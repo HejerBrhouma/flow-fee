@@ -9,12 +9,18 @@
 
 <ion-content [fullscreen]="true">
   @if (loading) {
-    <div class="ion-text-center ion-padding">
-      <ion-spinner></ion-spinner>
+    <div class="ion-padding">
+      <app-skeleton-block width="40%" height="1.5rem" class="ion-margin-bottom"></app-skeleton-block>
+      <app-skeleton-block width="60%" height="1rem" class="ion-margin-bottom"></app-skeleton-block>
+      <app-skeleton-block width="100%" height="6rem"></app-skeleton-block>
     </div>
   }
 
-  @if (!loading && expense) {
+  @if (error) {
+    <app-error-state message="Impossible de charger cette dépense." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error && expense) {
     <div class="ion-padding">
       <div class="status-row">
         <ion-badge [color]="statusColors[expense.status]">{{ statusLabels[expense.status] }}</ion-badge>

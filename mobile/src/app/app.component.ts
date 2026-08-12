@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { App, URLOpenListenerEvent } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 const OAUTH_CALLBACK_PREFIX = 'com.flowfee.app://oauth-callback';
 
@@ -15,9 +16,12 @@ const OAUTH_CALLBACK_PREFIX = 'com.flowfee.app://oauth-callback';
 export class AppComponent {
   constructor(
     private authService: AuthService,
+    private themeService: ThemeService,
     private router: Router,
     private zone: NgZone,
   ) {
+    this.themeService.init();
+
     App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
       this.zone.run(() => this.handleAppUrlOpen(event.url));
     });

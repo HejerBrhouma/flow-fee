@@ -8,6 +8,7 @@ import { IonicModule } from '@ionic/angular';
 import { ExpenseDetailPageRoutingModule } from './expense-detail-routing.module';
 
 import { ExpenseDetailPage } from './expense-detail.page';
+import { SharedModule } from '../../shared/shared.module';
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { ExpenseDetailPage } from './expense-detail.page';
     FormsModule,
     RouterModule,
     IonicModule,
-    ExpenseDetailPageRoutingModule
+    ExpenseDetailPageRoutingModule,
+    SharedModule
   ],
   declarations: [ExpenseDetailPage]
 })

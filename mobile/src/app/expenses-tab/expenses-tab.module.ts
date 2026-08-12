@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ExpensesTabPage } from './expenses-tab.page';
+import { SharedModule } from '../shared/shared.module';
 
 import { ExpensesTabPageRoutingModule } from './expenses-tab-routing.module';
 
@@ -14,7 +15,8 @@ import { ExpensesTabPageRoutingModule } from './expenses-tab-routing.module';
     FormsModule,
     ReactiveFormsModule,
     RouterModule,
-    ExpensesTabPageRoutingModule
+    ExpensesTabPageRoutingModule,
+    SharedModule
   ],
   declarations: [ExpensesTabPage]
 })

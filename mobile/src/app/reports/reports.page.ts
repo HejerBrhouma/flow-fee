@@ -12,6 +12,7 @@ import { DashboardStats } from '../core/models/company.model';
 export class ReportsPage implements OnInit {
   filterForm: FormGroup;
   loading = true;
+  error = false;
   stats: DashboardStats | null = null;
 
   readonly years = [2024, 2025, 2026];
@@ -38,11 +39,12 @@ export class ReportsPage implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.error = false;
     const { year, month } = this.filterForm.value;
 
     this.dashboardService.getStats(year, month).subscribe({
       next: (stats) => { this.stats = stats; this.loading = false; },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 
@@ -54,5 +56,10 @@ export class ReportsPage implements OnInit {
   maxTrendTotal(): number {
     if (!this.stats?.monthlyTrend.length) return 1;
     return Math.max(...this.stats.monthlyTrend.map(m => m.total), 1);
+  }
+
+  get fullYearTrend(): { month: number; total: number }[] {
+    const totals = new Map(this.stats?.monthlyTrend.map(m => [m.month, m.total]) ?? []);
+    return Array.from({ length: 12 }, (_, i) => ({ month: i + 1, total: totals.get(i + 1) ?? 0 }));
   }
 }

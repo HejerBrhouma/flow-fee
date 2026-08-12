@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, from, map, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, from, map, of, switchMap } from 'rxjs';
 import { Router } from '@angular/router';
 import { Preferences } from '@capacitor/preferences';
 import { Browser } from '@capacitor/browser';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, ChangePasswordPayload, LoginPayload, RegisterPayload, UpdateProfilePayload, User } from '../models/user.model';
+import { AuthResponse, ChangePasswordPayload, LoginPayload, LoginResult, RegisterPayload, UpdateProfilePayload, User } from '../models/user.model';
 
 const TOKEN_KEY = 'flow_fee_token';
 const USER_KEY = 'flow_fee_user';
@@ -58,15 +58,52 @@ export class AuthService {
     );
   }
 
-  login(payload: LoginPayload): Observable<User> {
-    // login_check (handled natively by the JWT bundle) only ever returns { token },
-    // unlike /auth/register which returns { token, user } — so the user has to be
-    // fetched separately via /auth/me instead of trusting a "user" field that never comes back.
-    return this.http.post<{ token: string }>(`${environment.apiUrl}/auth/login_check`, payload).pipe(
+  login(payload: LoginPayload): Observable<LoginResult> {
+    // login_check (handled natively by the JWT bundle) normally only ever returns { token },
+    // unlike /auth/register which returns { token, user } — so the user has to be fetched
+    // separately via /auth/me instead of trusting a "user" field that never comes back.
+    // For an account with 2FA enabled, the backend swaps that response for
+    // { twoFactorRequired: true, challengeToken } instead — no token is issued until the
+    // code is verified via verifyTwoFactor().
+    return this.http.post<{ token?: string; twoFactorRequired?: boolean; challengeToken?: string }>(
+      `${environment.apiUrl}/auth/login_check`, payload
+    ).pipe(
+      switchMap(response => {
+        if (response.twoFactorRequired) {
+          return of<LoginResult>({ requiresTwoFactor: true, challengeToken: response.challengeToken! });
+        }
+
+        this.tokenSubject.next(response.token!);
+        return from(Preferences.set({ key: TOKEN_KEY, value: response.token! })).pipe(
+          switchMap(() => this.fetchCurrentUser()),
+          map(user => ({ requiresTwoFactor: false, user }) as LoginResult),
+        );
+      }),
+    );
+  }
+
+  verifyTwoFactor(challengeToken: string, code: string): Observable<User> {
+    return this.http.post<{ token: string }>(`${environment.apiUrl}/auth/2fa/verify`, { challengeToken, code }).pipe(
       switchMap(response => {
         this.tokenSubject.next(response.token);
         return from(Preferences.set({ key: TOKEN_KEY, value: response.token }));
       }),
+      switchMap(() => this.fetchCurrentUser()),
+    );
+  }
+
+  setupTwoFactor(): Observable<{ secret: string; provisioningUri: string }> {
+    return this.http.post<{ secret: string; provisioningUri: string }>(`${environment.apiUrl}/auth/2fa/setup`, {});
+  }
+
+  enableTwoFactor(code: string): Observable<User> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/2fa/enable`, { code }).pipe(
+      switchMap(() => this.fetchCurrentUser()),
+    );
+  }
+
+  disableTwoFactor(password: string): Observable<User> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/2fa/disable`, { password }).pipe(
       switchMap(() => this.fetchCurrentUser()),
     );
   }
@@ -123,6 +160,17 @@ export class AuthService {
 
   changePassword(payload: ChangePasswordPayload): Observable<{ message: string }> {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/me/password`, payload);
+  }
+
+  exportData(): Observable<string> {
+    // Returned as text (not blob) — on mobile the JSON is opened via the in-app Browser as a
+    // data: URL rather than triggering an <a download> click, which native webviews don't
+    // reliably honor without the Filesystem/Share plugins.
+    return this.http.get(`${environment.apiUrl}/auth/me/export`, { responseType: 'text' });
+  }
+
+  deleteAccount(password: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/auth/me`, { body: { password } });
   }
 
   logout(): void {

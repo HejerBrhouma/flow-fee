@@ -1,14 +1,20 @@
 <div class="p-6 max-w-2xl mx-auto">
 
   @if (loading) {
-    <div class="flex justify-center py-12">
-      <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+    <div class="bg-white rounded-xl border border-gray-100 p-5 space-y-3 dark:bg-gray-800 dark:border-gray-700">
+      <app-skeleton-block width="50%" height="1.5rem"></app-skeleton-block>
+      <app-skeleton-block width="30%" height="1rem"></app-skeleton-block>
+      <app-skeleton-block width="100%" height="6rem"></app-skeleton-block>
     </div>
   }
 
-  @if (!loading && expense) {
+  @if (error) {
+    <app-error-state message="Impossible de charger cette dépense." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error && expense) {
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">{{ expense.title }}</h2>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ expense.title }}</h2>
       <span class="px-3 py-1 rounded-full text-sm font-medium"
         [class.bg-gray-100]="expense.status === 'draft'"
         [class.bg-amber-100]="expense.status === 'submitted'"
@@ -22,55 +28,55 @@
       </span>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4">
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-4 dark:bg-gray-800 dark:border-gray-700">
 
       <div class="flex justify-between">
-        <span class="text-gray-500 text-sm">Montant</span>
+        <span class="text-gray-500 text-sm dark:text-gray-400">Montant</span>
         <span class="font-bold text-2xl text-indigo-600">
           {{ expense.amount | number:'1.2-2' }} {{ expense.currency }}
         </span>
       </div>
 
       <div class="flex justify-between">
-        <span class="text-gray-500 text-sm">Date</span>
+        <span class="text-gray-500 text-sm dark:text-gray-400">Date</span>
         <span class="font-medium">{{ expense.expenseDate | date:'dd MMMM yyyy':'':'fr' }}</span>
       </div>
 
       @if (expense.category) {
         <div class="flex justify-between">
-          <span class="text-gray-500 text-sm">Catégorie</span>
+          <span class="text-gray-500 text-sm dark:text-gray-400">Catégorie</span>
           <span class="font-medium">{{ expense.category.name }}</span>
         </div>
       }
 
       @if (expense.department) {
         <div class="flex justify-between">
-          <span class="text-gray-500 text-sm">Département</span>
+          <span class="text-gray-500 text-sm dark:text-gray-400">Département</span>
           <span class="font-medium">{{ expense.department.name }}</span>
         </div>
       }
 
       @if (expense.description) {
         <div>
-          <p class="text-gray-500 text-sm mb-1">Description</p>
-          <p class="text-gray-700">{{ expense.description }}</p>
+          <p class="text-gray-500 text-sm mb-1 dark:text-gray-400">Description</p>
+          <p class="text-gray-700 dark:text-gray-200">{{ expense.description }}</p>
         </div>
       }
 
       @if (expense.receipts.length > 0 || canEdit) {
         <div>
-          <p class="text-gray-500 text-sm mb-2">Justificatifs</p>
+          <p class="text-gray-500 text-sm mb-2 dark:text-gray-400">Justificatifs</p>
 
           @if (expense.receipts.length > 0) {
             <div class="flex flex-wrap gap-2 mb-3">
               @for (receipt of expense.receipts; track receipt.id) {
-                <div class="flex items-center gap-2 border border-gray-200 rounded-lg pl-3 pr-1 py-2 text-sm">
+                <div class="flex items-center gap-2 border border-gray-200 rounded-lg pl-3 pr-1 py-2 text-sm dark:border-gray-700">
                   <a [href]="receipt.filePath" target="_blank" class="text-indigo-600 hover:underline">
                     📎 {{ receipt.originalName ?? 'Fichier' }}
                   </a>
                   @if (canEdit) {
                     <button (click)="deleteReceipt(receipt)" title="Supprimer"
-                      class="text-gray-300 hover:text-red-500 transition px-1.5">
+                      class="text-gray-300 hover:text-red-500 transition px-1.5 dark:text-gray-600">
                       ✕
                     </button>
                   }
@@ -86,9 +92,9 @@
               browseBtnClassName="text-indigo-600 font-medium hover:underline">
             </ngx-file-drop>
             @if (uploading) {
-              <p class="text-xs text-gray-400 mt-1">Envoi en cours...</p>
+              <p class="text-xs text-gray-400 mt-1 dark:text-gray-500">Envoi en cours...</p>
             } @else {
-              <p class="text-xs text-gray-400 mt-1">JPEG, PNG, WEBP ou PDF — 10 Mo max</p>
+              <p class="text-xs text-gray-400 mt-1 dark:text-gray-500">JPEG, PNG, WEBP ou PDF — 10 Mo max</p>
             }
           }
         </div>
@@ -96,11 +102,11 @@
 
       @if (expense.reviewedBy) {
         <div class="border-t pt-4">
-          <p class="text-gray-500 text-sm mb-1">
+          <p class="text-gray-500 text-sm mb-1 dark:text-gray-400">
             Révisé par {{ expense.reviewedBy.fullName }} — {{ expense.reviewedAt | date:'dd/MM/yyyy' }}
           </p>
           @if (expense.reviewComment) {
-            <p class="text-gray-700 italic">"{{ expense.reviewComment }}"</p>
+            <p class="text-gray-700 italic dark:text-gray-200">"{{ expense.reviewComment }}"</p>
           }
         </div>
       }

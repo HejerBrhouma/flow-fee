@@ -38,12 +38,26 @@
     }
 
     @if (loading) {
-      <div class="ion-text-center ion-padding">
-        <ion-spinner></ion-spinner>
-      </div>
+      @for (i of [1, 2, 3]; track i) {
+        <ion-card class="member-card">
+          <ion-card-content>
+            <div class="member-row">
+              <app-skeleton-block width="2.5rem" height="2.5rem" radius="50%"></app-skeleton-block>
+              <div class="member-info">
+                <app-skeleton-block width="60%" height="0.875rem" class="ion-margin-bottom"></app-skeleton-block>
+                <app-skeleton-block width="80%" height="0.75rem"></app-skeleton-block>
+              </div>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
     }
 
-    @if (!loading) {
+    @if (error) {
+      <app-error-state message="Impossible de charger l'équipe." (retry)="loadTeam()"></app-error-state>
+    }
+
+    @if (!loading && !error) {
       @for (member of members; track member.id) {
         <ion-card class="member-card">
           <ion-card-content>

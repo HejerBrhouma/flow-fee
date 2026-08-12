@@ -16,6 +16,7 @@ export class ExpensesTabPage implements OnInit {
   page = 1;
   pages = 1;
   loading = true;
+  error = false;
 
   filterForm: FormGroup;
 
@@ -51,6 +52,7 @@ export class ExpensesTabPage implements OnInit {
 
   load(event?: CustomEvent): void {
     this.loading = !event;
+    this.error = false;
     const filters: ExpenseFilters = { ...this.filterForm.value, page: this.page };
     if (!filters.status) delete filters.status;
 
@@ -64,6 +66,7 @@ export class ExpensesTabPage implements OnInit {
       },
       error: () => {
         this.loading = false;
+        if (!event) this.error = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });

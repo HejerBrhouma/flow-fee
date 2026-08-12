@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DashboardPage } from './dashboard.page';
+import { SharedModule } from '../shared/shared.module';
 
 import { DashboardPageRoutingModule } from './dashboard-routing.module';
 
@@ -13,7 +14,8 @@ import { DashboardPageRoutingModule } from './dashboard-routing.module';
     CommonModule,
     FormsModule,
     RouterModule,
-    DashboardPageRoutingModule
+    DashboardPageRoutingModule,
+    SharedModule
   ],
   declarations: [DashboardPage]
 })

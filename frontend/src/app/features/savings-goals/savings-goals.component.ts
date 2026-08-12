@@ -11,6 +11,7 @@ import { SavingsGoal } from '../../core/models/savings-goal.model';
 export class SavingsGoalsComponent implements OnInit {
   goals: SavingsGoal[] = [];
   loading = true;
+  error = false;
   showForm = false;
 
   contributingId: number | null = null;
@@ -42,9 +43,10 @@ export class SavingsGoalsComponent implements OnInit {
 
   load(): void {
     this.loading = true;
+    this.error = false;
     this.savingsGoalService.getAll().subscribe({
       next: (goals) => { this.goals = goals; this.loading = false; },
-      error: () => { this.loading = false; },
+      error: () => { this.loading = false; this.error = true; },
     });
   }
 

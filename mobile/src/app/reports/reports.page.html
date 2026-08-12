@@ -25,27 +25,36 @@
     </form>
 
     @if (loading) {
-      <div class="ion-text-center ion-padding">
-        <ion-spinner></ion-spinner>
-      </div>
+      @for (i of [1, 2]; track i) {
+        <ion-card>
+          <ion-card-content>
+            <app-skeleton-block width="40%" height="1rem" class="ion-margin-bottom"></app-skeleton-block>
+            <app-skeleton-block width="100%" height="140px"></app-skeleton-block>
+          </ion-card-content>
+        </ion-card>
+      }
     }
 
-    @if (!loading && stats) {
+    @if (error) {
+      <app-error-state message="Impossible de charger les rapports." (retry)="load()"></app-error-state>
+    }
+
+    @if (!loading && !error && stats) {
       <ion-card>
         <ion-card-header>
           <ion-card-title>Évolution annuelle</ion-card-title>
         </ion-card-header>
         <ion-card-content>
           @if (stats.monthlyTrend.length === 0) {
-            <div class="empty-state">
+            <div class="empty-state compact">
               <ion-icon name="bar-chart-outline"></ion-icon>
               <p>Aucune dépense cette année.</p>
             </div>
           } @else {
             <div class="trend-chart">
-              @for (m of stats.monthlyTrend; track m.month) {
+              @for (m of fullYearTrend; track m.month) {
                 <div class="trend-bar-wrapper">
-                  <div class="trend-bar" [style.height.%]="(m.total / maxTrendTotal()) * 100"></div>
+                  <div class="trend-bar" [class.is-empty]="m.total === 0" [style.height.%]="(m.total / maxTrendTotal()) * 100"></div>
                   <span class="trend-label">{{ monthLabels[m.month - 1] }}</span>
                 </div>
               }
@@ -60,7 +69,7 @@
         </ion-card-header>
         <ion-card-content>
           @if (stats.monthlyByCategory.length === 0) {
-            <div class="empty-state">
+            <div class="empty-state compact">
               <ion-icon name="pie-chart-outline"></ion-icon>
               <p>Aucune dépense ce mois-ci.</p>
             </div>

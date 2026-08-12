@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -15,6 +15,6 @@ const routes: Routes = [
 
 @NgModule({
   declarations: [LoginComponent, RegisterComponent],
-  imports: [CommonModule, ReactiveFormsModule, RouterModule.forChild(routes), TranslateModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule.forChild(routes), TranslateModule],
 })
 export class AuthModule {}
