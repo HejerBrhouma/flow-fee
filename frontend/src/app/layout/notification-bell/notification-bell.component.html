@@ -4,14 +4,14 @@
     <span class="text-lg">🔔</span>
     @if (unreadCount > 0) {
       <span
-        class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center leading-none">
+        class="absolute -top-0.5 -end-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold flex items-center justify-center leading-none">
         {{ unreadCount > 9 ? '9+' : unreadCount }}
       </span>
     }
   </button>
 
   @if (open) {
-    <div class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 dark:bg-gray-800 dark:border-gray-700">
+    <div class="absolute end-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 dark:bg-gray-800 dark:border-gray-700">
       <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
         <p class="font-semibold text-gray-800 text-sm dark:text-gray-100">Notifications</p>
         @if (unreadCount > 0) {

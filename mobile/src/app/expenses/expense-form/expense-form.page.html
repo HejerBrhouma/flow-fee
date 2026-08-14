@@ -8,6 +8,13 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
+  @if (!isEdit) {
+    <ion-button expand="block" fill="outline" [disabled]="scanningReceipt" (click)="scanReceipt()" class="ion-margin-bottom">
+      <ion-icon [name]="scanningReceipt ? 'hourglass-outline' : 'camera-outline'" slot="start"></ion-icon>
+      {{ scanningReceipt ? 'Analyse du reçu en cours...' : 'Scanner un reçu' }}
+    </ion-button>
+  }
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <ion-list lines="none">
       <ion-item>
@@ -33,6 +40,19 @@
         <ion-label>Date de la dépense *</ion-label>
         <ion-datetime-button datetime="expenseDate" slot="end"></ion-datetime-button>
       </ion-item>
+
+      <ion-item>
+        <ion-select label="Catégorie" labelPlacement="stacked" formControlName="categoryId" interface="popover"
+          (ionChange)="onCategoryChange()">
+          <ion-select-option [value]="null">Aucune catégorie</ion-select-option>
+          @for (category of categories; track category.id) {
+            <ion-select-option [value]="category.id">{{ category.icon }} {{ category.name }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+      @if (suggestedCategoryId && form.value.categoryId === suggestedCategoryId) {
+        <p class="hint">Catégorie suggérée automatiquement — modifiable.</p>
+      }
 
       <ion-item>
         <ion-textarea label="Description" labelPlacement="stacked" placeholder="Détails optionnels..." rows="3"

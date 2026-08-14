@@ -4,6 +4,7 @@ import { App, URLOpenListenerEvent } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
+import { PushService } from './core/services/push.service';
 
 const OAUTH_CALLBACK_PREFIX = 'com.flowfee.app://oauth-callback';
 
@@ -17,10 +18,24 @@ export class AppComponent {
   constructor(
     private authService: AuthService,
     private themeService: ThemeService,
+    private pushService: PushService,
     private router: Router,
     private zone: NgZone,
   ) {
     this.themeService.init();
+
+    // Single reactive spot for push registration — covers cold start with a persisted
+    // session, login, register and OAuth alike (all of them update currentUser$), and
+    // unregisters the device token the moment the user logs out.
+    let wasLoggedIn = false;
+    this.authService.currentUser$.subscribe(user => {
+      if (user && !wasLoggedIn) {
+        this.pushService.init();
+      } else if (!user && wasLoggedIn) {
+        this.pushService.unregister();
+      }
+      wasLoggedIn = !!user;
+    });
 
     App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
       this.zone.run(() => this.handleAppUrlOpen(event.url));

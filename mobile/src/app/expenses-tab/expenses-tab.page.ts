@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ToastController } from '@ionic/angular';
 import { ExpenseService } from '../core/services/expense.service';
+import { CacheService } from '../core/services/cache.service';
 import { Expense, ExpenseFilters, ExpenseStatus } from '../core/models/expense.model';
+
+const CACHE_KEY = 'expenses_list';
 
 @Component({
   selector: 'app-expenses-tab',
@@ -34,24 +37,34 @@ export class ExpensesTabPage implements OnInit {
     rejected: 'danger',
   };
 
+  private cacheLoaded = false;
+
   constructor(
     private expenseService: ExpenseService,
+    private cache: CacheService,
     private fb: FormBuilder,
     private toastController: ToastController,
   ) {
     this.filterForm = this.fb.group({ status: [''] });
   }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    const cached = await this.cache.get<Expense[]>(CACHE_KEY);
+    if (cached) {
+      this.expenses = cached;
+      this.loading = false;
+    }
+    this.cacheLoaded = true;
     this.load();
   }
 
   ionViewWillEnter(): void {
-    this.applyFilters();
+    if (this.cacheLoaded) this.applyFilters();
   }
 
   load(event?: CustomEvent): void {
-    this.loading = !event;
+    // Skip the skeleton if cached/previously loaded data is already on screen.
+    this.loading = !event && this.expenses.length === 0;
     this.error = false;
     const filters: ExpenseFilters = { ...this.filterForm.value, page: this.page };
     if (!filters.status) delete filters.status;
@@ -62,11 +75,12 @@ export class ExpensesTabPage implements OnInit {
         this.total = res.total;
         this.pages = res.pages;
         this.loading = false;
+        if (this.page === 1 && !filters.status) this.cache.set(CACHE_KEY, res.items);
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
       error: () => {
         this.loading = false;
-        if (!event) this.error = true;
+        if (!event && this.expenses.length === 0) this.error = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });

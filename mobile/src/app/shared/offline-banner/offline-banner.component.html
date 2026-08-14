@@ -1,0 +1,17 @@
+@if ((networkService.online$ | async) === false) {
+  <div class="status-bar offline">
+    <ion-icon name="cloud-offline-outline"></ion-icon>
+    <span>
+      Hors ligne
+      @if ((offlineQueue.pending$ | async)?.length; as count) {
+        — {{ count }} dépense{{ count > 1 ? 's' : '' }} en attente de synchronisation
+      }
+    </span>
+  </div>
+} @else if ((offlineQueue.pending$ | async)?.length; as count) {
+  <div class="status-bar syncing">
+    <ion-icon name="sync-outline"></ion-icon>
+    <span>{{ count }} dépense{{ count > 1 ? 's' : '' }} en attente</span>
+    <ion-button size="small" fill="clear" (click)="sync()">Synchroniser</ion-button>
+  </div>
+}

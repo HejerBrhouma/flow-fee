@@ -16,7 +16,8 @@ export type IconName =
   | 'inbox'
   | 'alert'
   | 'sun'
-  | 'moon';
+  | 'moon'
+  | 'notifications';
 
 @Component({
   selector: 'app-icon',

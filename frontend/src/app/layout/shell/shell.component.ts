@@ -17,6 +17,7 @@ export class ShellComponent implements OnInit {
     { labelKey: 'nav.budget',        icon: 'budget',    route: '/budgets' },
     { labelKey: 'nav.savingsGoals',  icon: 'savings',   route: '/savings-goals' },
     { labelKey: 'nav.reports',       icon: 'reports',   route: '/reports' },
+    { labelKey: 'nav.notifications', icon: 'notifications', route: '/notifications' },
   ];
 
   constructor(

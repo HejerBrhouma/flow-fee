@@ -21,3 +21,10 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Optional: path to a Firebase service account JSON, for push notifications
+    # (App\Service\PushNotificationService). Left unset in dev — the service fails open
+    # (logs and skips sending) rather than erroring when it's not configured.
+    App\Service\PushNotificationService:
+        arguments:
+            $credentialsPath: '%env(resolve:FIREBASE_CREDENTIALS)%'

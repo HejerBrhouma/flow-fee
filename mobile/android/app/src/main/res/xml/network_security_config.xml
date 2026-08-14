@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Allows plain HTTP (no TLS) only to the local dev machine's LAN IP, matching
+  DEV_MACHINE_LAN_IP in src/environments/environment*.ts. Android blocks cleartext
+  traffic by default since API 28; there's no hosted HTTPS backend yet (see the
+  environment files), so this is required for the native app to reach the local
+  Docker backend during development.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">192.168.100.61</domain>
+    </domain-config>
+</network-security-config>

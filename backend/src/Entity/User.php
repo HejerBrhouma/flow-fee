@@ -129,11 +129,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Notification::class, orphanRemoval: true)]
     private Collection $notifications;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: DeviceToken::class, orphanRemoval: true)]
+    private Collection $deviceTokens;
+
     public function __construct()
     {
         $this->expenses = new ArrayCollection();
         $this->userCompanies = new ArrayCollection();
         $this->notifications = new ArrayCollection();
+        $this->deviceTokens = new ArrayCollection();
     }
 
     #[ORM\PrePersist]
@@ -244,4 +248,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getExpenses(): Collection { return $this->expenses; }
     public function getUserCompanies(): Collection { return $this->userCompanies; }
     public function getNotifications(): Collection { return $this->notifications; }
+    public function getDeviceTokens(): Collection { return $this->deviceTokens; }
 }

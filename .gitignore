@@ -18,6 +18,11 @@ mobile/.angular/
 mobile/android/app/build/
 mobile/android/.gradle/
 mobile/ios/App/Pods/
+mobile/android/app/google-services.json
+mobile/ios/App/App/GoogleService-Info.plist
+
+# Firebase
+backend/config/firebase-credentials.json
 
 # System
 .DS_Store

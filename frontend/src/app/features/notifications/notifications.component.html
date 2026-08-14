@@ -1,0 +1,56 @@
+<div class="p-6 max-w-2xl mx-auto">
+
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Notifications</h2>
+    @if (unreadCount > 0) {
+      <button (click)="markAllRead()" type="button"
+        class="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
+        Tout marquer comme lu
+      </button>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden p-4 space-y-4 dark:bg-gray-800 dark:border-gray-700">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="flex items-center gap-3">
+          <app-skeleton-block width="2rem" height="2rem"></app-skeleton-block>
+          <app-skeleton-block width="60%" height="1rem"></app-skeleton-block>
+        </div>
+      }
+    </div>
+  }
+
+  @if (error) {
+    <app-error-state message="Impossible de charger les notifications." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error && notifications.length === 0) {
+    <app-empty-state icon="inbox" message="Aucune notification pour l'instant."></app-empty-state>
+  }
+
+  @if (!loading && !error && notifications.length > 0) {
+    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+      @for (notification of notifications; track notification.id) {
+        <div (click)="select(notification)"
+          class="w-full flex items-start gap-3 px-4 py-3.5 text-left border-b border-gray-50 last:border-0 hover:bg-gray-50 transition cursor-pointer dark:border-gray-700 dark:hover:bg-gray-700"
+          [class.bg-indigo-50]="!notification.isRead">
+          <span class="text-xl shrink-0">{{ icons[notification.type] }}</span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm text-gray-700 dark:text-gray-200" [class.font-semibold]="!notification.isRead">
+              {{ notification.message }}
+            </span>
+            <span class="block text-xs text-gray-400 mt-0.5 dark:text-gray-500">{{ timeAgo(notification.createdAt) }}</span>
+          </span>
+          @if (!notification.isRead) {
+            <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0 mt-2"></span>
+          }
+          <button (click)="delete(notification, $event)" title="Supprimer"
+            class="text-gray-300 hover:text-red-500 transition shrink-0 px-1 dark:text-gray-600">
+            ✕
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

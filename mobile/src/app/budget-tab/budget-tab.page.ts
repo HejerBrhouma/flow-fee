@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AlertController, ToastController } from '@ionic/angular';
 import { forkJoin, of } from 'rxjs';
@@ -7,6 +8,10 @@ import { BudgetService } from '../core/services/budget.service';
 import { BudgetConsumption } from '../core/models/budget.model';
 import { SavingsGoalService } from '../core/services/savings-goal.service';
 import { SavingsGoal } from '../core/models/savings-goal.model';
+import { CacheService } from '../core/services/cache.service';
+
+const BUDGETS_CACHE_KEY = 'budget_tab_budgets';
+const GOALS_CACHE_KEY = 'budget_tab_goals';
 
 @Component({
   selector: 'app-budget-tab',
@@ -46,9 +51,11 @@ export class BudgetTabPage implements OnInit {
   constructor(
     private budgetService: BudgetService,
     private savingsGoalService: SavingsGoalService,
+    private cache: CacheService,
     private fb: FormBuilder,
     private toastController: ToastController,
     private alertController: AlertController,
+    private route: ActivatedRoute,
   ) {
     const now = new Date();
     this.budgetForm = this.fb.group({
@@ -66,12 +73,27 @@ export class BudgetTabPage implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  private cacheLoaded = false;
+
+  async ngOnInit(): Promise<void> {
+    this.route.queryParams.subscribe(params => {
+      if (params['segment'] === 'savings') this.segment = 'savings';
+    });
+
+    const [cachedBudgets, cachedGoals] = await Promise.all([
+      this.cache.get<BudgetConsumption[]>(BUDGETS_CACHE_KEY),
+      this.cache.get<SavingsGoal[]>(GOALS_CACHE_KEY),
+    ]);
+    if (cachedBudgets) { this.budgets = cachedBudgets; this.budgetsLoading = false; }
+    if (cachedGoals) { this.goals = cachedGoals; this.goalsLoading = false; }
+    this.cacheLoaded = true;
+
     this.loadBudgets();
     this.loadGoals();
   }
 
   ionViewWillEnter(): void {
+    if (!this.cacheLoaded) return;
     this.loadBudgets();
     this.loadGoals();
   }
@@ -83,7 +105,7 @@ export class BudgetTabPage implements OnInit {
   // --- Budget logic ---
 
   loadBudgets(event?: CustomEvent): void {
-    this.budgetsLoading = !event;
+    this.budgetsLoading = !event && this.budgets.length === 0;
     this.budgetsError = false;
 
     this.budgetService.getMyBudgets().subscribe({
@@ -91,6 +113,7 @@ export class BudgetTabPage implements OnInit {
         if (budgets.length === 0) {
           this.budgets = [];
           this.budgetsLoading = false;
+          this.cache.set(BUDGETS_CACHE_KEY, []);
           (event?.target as HTMLIonRefresherElement | undefined)?.complete();
           return;
         }
@@ -100,12 +123,13 @@ export class BudgetTabPage implements OnInit {
         ).subscribe(results => {
           this.budgets = results.filter((r): r is BudgetConsumption => r !== null);
           this.budgetsLoading = false;
+          this.cache.set(BUDGETS_CACHE_KEY, this.budgets);
           (event?.target as HTMLIonRefresherElement | undefined)?.complete();
         });
       },
       error: () => {
         this.budgetsLoading = false;
-        if (!event) this.budgetsError = true;
+        if (!event && this.budgets.length === 0) this.budgetsError = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });
@@ -171,18 +195,19 @@ export class BudgetTabPage implements OnInit {
   // --- Savings goals logic ---
 
   loadGoals(event?: CustomEvent): void {
-    this.goalsLoading = !event;
+    this.goalsLoading = !event && this.goals.length === 0;
     this.goalsError = false;
 
     this.savingsGoalService.getAll().subscribe({
       next: (goals) => {
         this.goals = goals;
         this.goalsLoading = false;
+        this.cache.set(GOALS_CACHE_KEY, goals);
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
       error: () => {
         this.goalsLoading = false;
-        if (!event) this.goalsError = true;
+        if (!event && this.goals.length === 0) this.goalsError = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });

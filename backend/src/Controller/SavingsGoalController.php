@@ -6,6 +6,7 @@ use App\Entity\Notification;
 use App\Entity\SavingsGoal;
 use App\Entity\User;
 use App\Repository\SavingsGoalRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +24,7 @@ class SavingsGoalController extends AbstractController
         private readonly SavingsGoalRepository $savingsGoalRepository,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
+        private readonly NotificationService $notificationService,
     ) {}
 
     #[Route('', name: 'list', methods: ['GET'])]
@@ -154,12 +156,12 @@ class SavingsGoalController extends AbstractController
         $isReached = (float) $goal->getCurrentAmount() >= (float) $goal->getTargetAmount();
 
         if ($isReached && !$wasReached) {
-            $notification = new Notification();
-            $notification->setUser($goal->getUser());
-            $notification->setType(Notification::TYPE_SAVINGS_GOAL_REACHED);
-            $notification->setMessage(sprintf('Bravo, vous avez atteint votre objectif "%s" !', $goal->getName()));
-            $notification->setData(['savingsGoalId' => $goal->getId()]);
-            $this->em->persist($notification);
+            $this->notificationService->notify(
+                $goal->getUser(),
+                Notification::TYPE_SAVINGS_GOAL_REACHED,
+                sprintf('Bravo, vous avez atteint votre objectif "%s" !', $goal->getName()),
+                ['savingsGoalId' => $goal->getId()],
+            );
             $this->em->flush();
         }
 

@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Company;
 use App\Entity\Department;
+use App\Entity\Notification;
 use App\Entity\User;
 use App\Entity\UserCompany;
 use App\Repository\CompanyRepository;
@@ -11,6 +12,7 @@ use App\Repository\UserCompanyRepository;
 use App\Repository\UserRepository;
 use App\Security\Voter\CompanyVoter;
 use App\Service\AddressVerificationService;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,6 +33,7 @@ class CompanyController extends AbstractController
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
         private readonly AddressVerificationService $addressVerification,
+        private readonly NotificationService $notificationService,
     ) {}
 
     #[Route('/verify-address', name: 'verify_address', methods: ['GET'])]
@@ -204,6 +207,14 @@ class CompanyController extends AbstractController
         }
 
         $this->em->persist($userCompany);
+
+        $this->notificationService->notify(
+            $invitedUser,
+            Notification::TYPE_TEAM_INVITE,
+            sprintf('Vous avez rejoint l\'entreprise "%s".', $company->getName()),
+            ['companyId' => $company->getId()],
+        );
+
         $this->em->flush();
 
         return $this->json(

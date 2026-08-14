@@ -15,6 +15,7 @@ use App\Repository\DepartmentRepository;
 use App\Repository\ExpenseReceiptRepository;
 use App\Repository\ExpenseRepository;
 use App\Repository\UserCompanyRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -47,6 +48,7 @@ class ExpenseController extends AbstractController
         private readonly PaginatorInterface $paginator,
         private readonly StorageInterface $storage,
         private readonly RequestStack $requestStack,
+        private readonly NotificationService $notificationService,
     ) {}
 
     /**
@@ -199,6 +201,25 @@ class ExpenseController extends AbstractController
         }
 
         $expense->setStatus(Expense::STATUS_SUBMITTED);
+
+        // Personal expenses have no manager to notify — only company expenses (tied to a
+        // department) go to the company admins for review.
+        if ($department = $expense->getDepartment()) {
+            $admins = $this->userCompanyRepository->findBy([
+                'company' => $department->getCompany(),
+                'role' => UserCompany::ROLE_ADMIN,
+            ]);
+
+            foreach ($admins as $membership) {
+                $this->notificationService->notify(
+                    $membership->getUser(),
+                    Notification::TYPE_EXPENSE_SUBMITTED,
+                    sprintf('%s a soumis une dépense "%s" pour validation.', $expense->getUser()->getFullName(), $expense->getTitle()),
+                    ['expenseId' => $expense->getId()],
+                );
+            }
+        }
+
         $this->em->flush();
 
         return $this->json(
@@ -230,17 +251,13 @@ class ExpenseController extends AbstractController
         $expense->setStatus($action === 'approve' ? Expense::STATUS_APPROVED : Expense::STATUS_REJECTED);
 
         // Notify the expense owner
-        $notification = new Notification();
-        $notification->setUser($expense->getUser());
-        $notification->setType($action === 'approve' ? Notification::TYPE_EXPENSE_APPROVED : Notification::TYPE_EXPENSE_REJECTED);
-        $notification->setMessage(sprintf(
-            'Votre dépense "%s" a été %s.',
-            $expense->getTitle(),
-            $action === 'approve' ? 'approuvée' : 'rejetée'
-        ));
-        $notification->setData(['expenseId' => $expense->getId()]);
+        $this->notificationService->notify(
+            $expense->getUser(),
+            $action === 'approve' ? Notification::TYPE_EXPENSE_APPROVED : Notification::TYPE_EXPENSE_REJECTED,
+            sprintf('Votre dépense "%s" a été %s.', $expense->getTitle(), $action === 'approve' ? 'approuvée' : 'rejetée'),
+            ['expenseId' => $expense->getId()],
+        );
 
-        $this->em->persist($notification);
         $this->em->flush();
 
         if ($action === 'approve') {
@@ -311,19 +328,19 @@ class ExpenseController extends AbstractController
         ]);
 
         foreach ($admins as $membership) {
-            $notification = new Notification();
-            $notification->setUser($membership->getUser());
-            $notification->setType(Notification::TYPE_BUDGET_ALERT);
-            $notification->setMessage(sprintf(
-                'Le budget du département "%s" a atteint %d%% (%.2f / %.2f %s).',
-                $department->getName(),
-                $crossedThreshold,
-                $spentAfter,
-                $amount,
-                $budget->getCurrency()
-            ));
-            $notification->setData(['departmentId' => $department->getId(), 'budgetId' => $budget->getId()]);
-            $this->em->persist($notification);
+            $this->notificationService->notify(
+                $membership->getUser(),
+                Notification::TYPE_BUDGET_ALERT,
+                sprintf(
+                    'Le budget du département "%s" a atteint %d%% (%.2f / %.2f %s).',
+                    $department->getName(),
+                    $crossedThreshold,
+                    $spentAfter,
+                    $amount,
+                    $budget->getCurrency()
+                ),
+                ['departmentId' => $department->getId(), 'budgetId' => $budget->getId()],
+            );
         }
 
         $this->em->flush();
@@ -375,19 +392,19 @@ class ExpenseController extends AbstractController
             return;
         }
 
-        $notification = new Notification();
-        $notification->setUser($user);
-        $notification->setType(Notification::TYPE_BUDGET_ALERT);
-        $notification->setMessage(sprintf(
-            'Votre budget %s a atteint %d%% (%.2f / %.2f %s).',
-            $budget->getPeriod() === Budget::PERIOD_MONTHLY ? 'mensuel' : 'annuel',
-            $crossedThreshold,
-            $spentAfter,
-            $amount,
-            $budget->getCurrency()
-        ));
-        $notification->setData(['budgetId' => $budget->getId()]);
-        $this->em->persist($notification);
+        $this->notificationService->notify(
+            $user,
+            Notification::TYPE_BUDGET_ALERT,
+            sprintf(
+                'Votre budget %s a atteint %d%% (%.2f / %.2f %s).',
+                $budget->getPeriod() === Budget::PERIOD_MONTHLY ? 'mensuel' : 'annuel',
+                $crossedThreshold,
+                $spentAfter,
+                $amount,
+                $budget->getCurrency()
+            ),
+            ['budgetId' => $budget->getId()],
+        );
         $this->em->flush();
     }
 

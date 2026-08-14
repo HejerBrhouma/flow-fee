@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DashboardService } from '../core/services/dashboard.service';
 import { AuthService } from '../core/services/auth.service';
+import { CacheService } from '../core/services/cache.service';
 import { DashboardStats } from '../core/models/company.model';
+
+const CACHE_KEY = 'dashboard_stats';
 
 @Component({
   selector: 'app-dashboard',
@@ -16,28 +19,37 @@ export class DashboardPage implements OnInit {
 
   constructor(
     private dashboardService: DashboardService,
+    private cache: CacheService,
     public authService: AuthService,
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    const cached = await this.cache.get<DashboardStats>(CACHE_KEY);
+    if (cached) {
+      this.stats = cached;
+      this.loading = false;
+    }
     this.load();
   }
 
   load(event?: CustomEvent): void {
-    this.loading = !event;
+    // Skip the skeleton if cached data is already on screen — only a true cold start
+    // (no cache, no refresh gesture) should show it.
+    this.loading = !event && !this.stats;
     this.error = false;
 
     this.dashboardService.getStats().subscribe({
       next: (stats) => {
         this.stats = stats;
         this.loading = false;
+        this.cache.set(CACHE_KEY, stats);
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
       error: () => {
         this.loading = false;
-        // A failed pull-to-refresh keeps the existing data on screen instead of
-        // replacing it with an error state.
-        if (!event) this.error = true;
+        // A failed pull-to-refresh (or an offline load with cached data already shown)
+        // keeps the existing data on screen instead of replacing it with an error state.
+        if (!event && !this.stats) this.error = true;
         (event?.target as HTMLIonRefresherElement | undefined)?.complete();
       },
     });
