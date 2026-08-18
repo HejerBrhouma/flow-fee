@@ -43,4 +43,20 @@ export class RegisterComponent {
       },
     });
   }
+
+  // Same OAuth flow as login — the backend creates the account on first sign-in if it
+  // doesn't exist yet (see OAuthAuthenticator), so this doubles as sign-up.
+  registerWithGoogle(): void {
+    this.authService.loginWithGoogle().subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => this.toastr.error('Authentification Google échouée.'),
+    });
+  }
+
+  registerWithFacebook(): void {
+    this.authService.loginWithFacebook().subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => this.toastr.error('Authentification Facebook échouée.'),
+    });
+  }
 }

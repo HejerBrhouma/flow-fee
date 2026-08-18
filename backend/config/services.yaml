@@ -28,3 +28,11 @@ services:
     App\Service\PushNotificationService:
         arguments:
             $credentialsPath: '%env(resolve:FIREBASE_CREDENTIALS)%'
+
+    # URL of the web frontend (to build links in emails, e.g. the password reset link) and
+    # the "From" address used for outgoing mail — must match the authenticated SMTP account
+    # for providers like Gmail, which reject/rewrite mismatched From headers.
+    App\Controller\AuthController:
+        arguments:
+            $frontendUrl: '%env(FRONTEND_URL)%'
+            $mailerFrom: '%env(MAILER_FROM)%'

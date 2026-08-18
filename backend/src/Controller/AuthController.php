@@ -12,12 +12,15 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -44,6 +47,10 @@ class AuthController extends AbstractController
         private readonly ExpenseRepository $expenseRepository,
         private readonly NotificationRepository $notificationRepository,
         private readonly UserCompanyRepository $userCompanyRepository,
+        private readonly MailerInterface $mailer,
+        private readonly LoggerInterface $logger,
+        private readonly string $frontendUrl,
+        private readonly string $mailerFrom,
     ) {}
 
     /**
@@ -302,6 +309,71 @@ class AuthController extends AbstractController
         $this->em->flush();
 
         return $this->json(null, Response::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * Always returns the same generic message whether or not the email matches an account
+     * (or an OAuth-only account with no local password) — this avoids leaking which emails
+     * are registered. The reset link itself is only sent when there's actually a local
+     * password to reset.
+     */
+    #[Route('/forgot-password', name: 'forgot_password', methods: ['POST'])]
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+        $genericResponse = ['message' => 'Si un compte existe avec cette adresse, un email de réinitialisation vient d\'être envoyé.'];
+
+        $user = $this->userRepository->findOneBy(['email' => $data['email'] ?? '']);
+        if (!$user || !$user->getPassword()) {
+            return $this->json($genericResponse);
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $user->setPasswordResetToken($token);
+        $user->setPasswordResetTokenExpiresAt(new \DateTime('+1 hour'));
+        $this->em->flush();
+
+        $resetUrl = sprintf('%s/auth/reset-password?token=%s', rtrim($this->frontendUrl, '/'), $token);
+
+        $email = (new Email())
+            ->from($this->mailerFrom)
+            ->to($user->getEmail())
+            ->subject('Réinitialisation de votre mot de passe Flow Fee')
+            ->text("Bonjour {$user->getFirstName()},\n\nVous avez demandé la réinitialisation de votre mot de passe Flow Fee. Cliquez sur le lien ci-dessous (valable 1 heure) :\n\n{$resetUrl}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez cet email.")
+            ->html("<p>Bonjour {$user->getFirstName()},</p><p>Vous avez demandé la réinitialisation de votre mot de passe Flow Fee. Cliquez sur le lien ci-dessous (valable 1 heure) :</p><p><a href=\"{$resetUrl}\">{$resetUrl}</a></p><p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>");
+
+        try {
+            $this->mailer->send($email);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Failed to send password reset email.', ['exception' => $e->getMessage()]);
+        }
+
+        return $this->json($genericResponse);
+    }
+
+    #[Route('/reset-password', name: 'reset_password', methods: ['POST'])]
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+        $token = $data['token'] ?? '';
+        $newPassword = $data['newPassword'] ?? '';
+
+        $user = $token ? $this->userRepository->findOneBy(['passwordResetToken' => $token]) : null;
+
+        if (!$user || !$user->getPasswordResetTokenExpiresAt() || $user->getPasswordResetTokenExpiresAt() < new \DateTime()) {
+            return $this->json(['message' => 'Lien de réinitialisation invalide ou expiré.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        if (strlen($newPassword) < 8) {
+            return $this->json(['message' => 'Le mot de passe doit contenir au moins 8 caractères.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $user->setPassword($this->passwordHasher->hashPassword($user, $newPassword));
+        $user->setPasswordResetToken(null);
+        $user->setPasswordResetTokenExpiresAt(null);
+        $this->em->flush();
+
+        return $this->json(['message' => 'Mot de passe réinitialisé avec succès.']);
     }
 
     #[Route('/oauth/google', name: 'oauth_google', methods: ['GET'])]

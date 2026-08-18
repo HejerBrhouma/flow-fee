@@ -14,6 +14,11 @@ const routes: Routes = [
     loadChildren: () => import('./auth/register/register.module').then(m => m.RegisterPageModule),
   },
   {
+    path: 'auth/forgot-password',
+    canActivate: [guestGuard],
+    loadChildren: () => import('./auth/forgot-password/forgot-password.module').then(m => m.ForgotPasswordPageModule),
+  },
+  {
     path: '',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule),
   },

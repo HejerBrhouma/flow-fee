@@ -6,6 +6,26 @@
       <p class="text-gray-500 mt-2 dark:text-gray-400">Créer votre compte</p>
     </div>
 
+    <!-- OAuth buttons -->
+    <div class="space-y-3 mb-6">
+      <button type="button" (click)="registerWithGoogle()"
+        class="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg px-4 py-2.5 hover:bg-gray-50 transition dark:border-gray-600 dark:hover:bg-gray-700">
+        <img src="assets/icons/google.svg" alt="Google" class="w-5 h-5">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Continuer avec Google</span>
+      </button>
+      <button type="button" (click)="registerWithFacebook()"
+        class="w-full flex items-center justify-center gap-3 bg-blue-600 rounded-lg px-4 py-2.5 hover:bg-blue-700 transition">
+        <img src="assets/icons/facebook.svg" alt="Facebook" class="w-5 h-5">
+        <span class="text-sm font-medium text-white">Continuer avec Facebook</span>
+      </button>
+    </div>
+
+    <div class="flex items-center gap-3 mb-6">
+      <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+      <span class="text-sm text-gray-400 dark:text-gray-500">ou</span>
+      <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+    </div>
+
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
 
       <!-- Account type -->
@@ -13,19 +33,17 @@
         <label class="relative cursor-pointer">
           <input type="radio" formControlName="type" value="personal" class="sr-only">
           <div class="border-2 rounded-lg p-3 text-center transition"
-            [class.border-indigo-500]="form.get('type')?.value === 'personal'"
-            [class.border-gray-200]="form.get('type')?.value !== 'personal'">
+            [ngClass]="form.get('type')?.value === 'personal' ? 'border-indigo-500' : 'border-gray-200 dark:border-gray-600'">
             <span class="text-lg">👤</span>
-            <p class="text-sm font-medium mt-1">Particulier</p>
+            <p class="text-sm font-medium mt-1 text-gray-700 dark:text-gray-100">Particulier</p>
           </div>
         </label>
         <label class="relative cursor-pointer">
           <input type="radio" formControlName="type" value="professional" class="sr-only">
           <div class="border-2 rounded-lg p-3 text-center transition"
-            [class.border-indigo-500]="form.get('type')?.value === 'professional'"
-            [class.border-gray-200]="form.get('type')?.value !== 'professional'">
+            [ngClass]="form.get('type')?.value === 'professional' ? 'border-indigo-500' : 'border-gray-200 dark:border-gray-600'">
             <span class="text-lg">🏢</span>
-            <p class="text-sm font-medium mt-1">Professionnel</p>
+            <p class="text-sm font-medium mt-1 text-gray-700 dark:text-gray-100">Professionnel</p>
           </div>
         </label>
       </div>

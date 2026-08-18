@@ -69,9 +69,37 @@ Deux fonctionnalités nécessitent des identifiants externes réels pour fonctio
 
 **Conversion de devises** : les dépenses, budgets et objectifs d'épargne peuvent chacun avoir leur propre devise (EUR, USD, GBP, TND). Pour que les totaux (tableau de bord, consommation de budget) restent cohérents, `App\Service\CurrencyConverter` convertit tout dans une devise commune avant de sommer, en utilisant les taux de change en temps réel de [open.er-api.com](https://www.exchangerate-api.com/docs/free) — une API gratuite, sans clé requise. Les taux sont mis en cache 12h ; si l'API est injoignable, un repli sur des taux approximatifs statiques (codés dans le service) est utilisé automatiquement.
 
+### Notifications push (Firebase)
+
+Optionnel : sans configuration, les notifications restent disponibles en in-app (cloche, page `/notifications`) mais aucun push système n'est envoyé — `PushNotificationService` échoue silencieusement (log + no-op) tant que Firebase n'est pas configuré, sans jamais bloquer l'action déclenchante (validation de dépense, objectif atteint, etc.).
+
+Pour activer les push (Android) :
+
+1. Créer un projet sur la [Firebase Console](https://console.firebase.google.com).
+2. Ajouter une app Android avec le package `com.flowfee.app`, télécharger `google-services.json` et le placer dans `mobile/android/app/google-services.json` (ignoré par git, déjà pris en charge par `android/app/build.gradle`).
+3. Dans les paramètres du projet → **Comptes de service**, générer une clé privée. Placer le JSON téléchargé dans `backend/config/firebase-credentials.json` (ignoré par git). `backend/.env.local` doit contenir :
+   ```
+   FIREBASE_CREDENTIALS=%kernel.project_dir%/config/firebase-credentials.json
+   ```
+4. Redémarrer le conteneur `backend` (`docker compose restart backend`) pour que la config soit prise en compte.
+
+**Build natif Android requis pour tester réellement** : les push nécessitent un vrai token FCM, obtenu uniquement via `npx cap run android` (émulateur avec image système **Google Play**, ou appareil physique) — le mode navigateur (`http://localhost:8100`) n'a pas de fallback push. Deux réglages natifs déjà en place dans `mobile/android/` sont nécessaires pour que l'app puisse effectivement parler au backend en HTTP local :
+- `android/app/src/main/res/xml/network_security_config.xml` autorise le trafic HTTP en clair vers l'IP LAN de dev (Android bloque le HTTP par défaut depuis l'API 28).
+- `capacitor.config.ts` force `server.androidScheme: 'http'`, sinon le WebView (servi en `https://localhost` par défaut) bloque les appels HTTP vers l'API comme "contenu mixte".
+
+Ces deux réglages sont **spécifiques au développement local** (pas de backend HTTPS hébergé pour l'instant) — à revoir avant une publication en production avec une vraie API HTTPS.
+
 ## Application mobile
 
-Le dossier `mobile/` contient une application Ionic + Angular + Capacitor qui consomme la **même API** que le frontend web (aucune différence côté backend). Le périmètre actuel couvre l'essentiel : authentification, tableau de bord, dépenses (liste, création, détail, justificatif photo via la caméra native), notifications, profil/déconnexion. Budgets, objectifs d'épargne et gestion d'entreprise ne sont pas encore portés sur mobile.
+Le dossier `mobile/` contient une application Ionic + Angular + Capacitor qui consomme la **même API** que le frontend web (aucune différence côté backend). Elle a globalement la parité avec le web : authentification (classique + Google/Facebook + 2FA), tableau de bord, dépenses (liste, création, détail, justificatif photo via la caméra native, scan de reçu par OCR), budgets, objectifs d'épargne, notifications (in-app + push), gestion d'entreprise (équipe, départements, validation), profil.
+
+Fonctionnalités spécifiques au mobile :
+
+- **Mode hors-ligne** : création de dépense mise en file d'attente si pas de réseau (synchronisation automatique au retour de la connexion), cache local (stale-while-revalidate) pour le tableau de bord, les dépenses et les budgets.
+- **Scan de reçu (OCR)** : extraction automatique du montant et de la date depuis une photo de reçu (Tesseract.js, traitement 100% local, pas d'API externe).
+- **Catégorisation automatique** : suggestion de catégorie de dépense à partir du titre saisi (web et mobile).
+- **Notifications push** : alertes système (budget dépassé, objectif d'épargne atteint, dépense soumise/validée, invitation d'équipe) en plus des notifications in-app — voir [Notifications push (Firebase)](#notifications-push-firebase) ci-dessous pour la configuration.
+- **Dark mode manuel** : bascule clair/sombre indépendante du thème système (page Profil).
 
 ### Tester dans le navigateur (déjà lancé avec `docker compose up`)
 
@@ -104,9 +132,9 @@ Depuis Android Studio / Xcode, lancer sur un simulateur/émulateur ou un apparei
 
 ### Notes avant publication sur les stores
 
-- **Android** : le projet a été généré avec l'`applicationId` par défaut (`io.ionic.starter`) — à renommer dans `android/app/build.gradle` (et la structure de package Java associée) avant publication. `capacitor.config.ts` utilise déjà le bon identifiant (`com.flowfee.app`) pour iOS.
+- **Android** : `applicationId`/`namespace` déjà correctement définis à `com.flowfee.app` dans `android/app/build.gradle`, cohérent avec `capacitor.config.ts` et iOS.
 - **iOS** : les descriptions de permission caméra/photothèque sont déjà configurées dans `Info.plist`.
-- **URL de l'API** : `mobile/src/environments/environment.prod.ts` pointe vers un domaine placeholder (`api.flow-fee.com`) — à remplacer par l'URL réelle du backend en production.
+- **URL de l'API** : `mobile/src/environments/environment.ts` et `environment.prod.ts` pointent vers l'IP LAN de la machine de dev (`DEV_MACHINE_LAN_IP`, en dur) — à remplacer par l'URL réelle du backend HTTPS en production, et à retirer par la même occasion `network_security_config.xml` (cleartext) et `androidScheme: 'http'` dans `capacitor.config.ts` (voir [Notifications push (Firebase)](#notifications-push-firebase)), qui ne servent qu'à autoriser le HTTP en local.
 
 ## Commandes utiles
 

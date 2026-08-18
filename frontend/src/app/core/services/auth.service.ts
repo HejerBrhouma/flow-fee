@@ -166,6 +166,14 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/me/password`, payload);
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/reset-password`, { token, newPassword });
+  }
+
   exportData(): Observable<Blob> {
     return this.http.get(`${environment.apiUrl}/auth/me/export`, { responseType: 'blob' });
   }

@@ -32,6 +32,10 @@
           </ion-item>
         </ion-list>
 
+        <p class="forgot-link">
+          <a routerLink="/auth/forgot-password">Mot de passe oublié ?</a>
+        </p>
+
         <ion-button expand="block" type="submit" [disabled]="form.invalid || loading" class="ion-margin-top">
           {{ loading ? 'Connexion...' : 'Se connecter' }}
         </ion-button>

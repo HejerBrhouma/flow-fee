@@ -27,6 +27,7 @@
     "emailPlaceholder": "you@example.com",
     "emailInvalid": "Invalid email.",
     "password": "Password",
+    "forgotPassword": "Forgot password?",
     "submit": "Sign in",
     "submitting": "Signing in...",
     "noAccount": "Don't have an account?",

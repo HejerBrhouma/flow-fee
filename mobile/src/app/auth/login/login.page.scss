@@ -40,6 +40,18 @@ ion-item {
   margin-bottom: 12px;
 }
 
+.forgot-link {
+  text-align: right;
+  margin: -4px 4px 0;
+
+  a {
+    color: var(--ion-color-primary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+}
+
 .oauth-divider {
   display: flex;
   align-items: center;

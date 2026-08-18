@@ -162,6 +162,13 @@ export class AuthService {
     return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/me/password`, payload);
   }
 
+  // The reset link itself opens in the phone's browser (points at the web app's
+  // /auth/reset-password, which needs no native counterpart) — no token ever needs to flow
+  // back into the mobile app, so there's nothing else to wire up here.
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${environment.apiUrl}/auth/forgot-password`, { email });
+  }
+
   exportData(): Observable<string> {
     // Returned as text (not blob) — on mobile the JSON is opened via the in-app Browser as a
     // data: URL rather than triggering an <a download> click, which native webviews don't

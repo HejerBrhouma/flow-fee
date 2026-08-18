@@ -2,6 +2,8 @@ import { Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { App, URLOpenListenerEvent } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar } from '@capacitor/status-bar';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 import { PushService } from './core/services/push.service';
@@ -23,6 +25,13 @@ export class AppComponent {
     private zone: NgZone,
   ) {
     this.themeService.init();
+
+    // Android 15+ (API 35+, our compileSdk/targetSdk) renders edge-to-edge by default,
+    // drawing the WebView behind the status bar — without this, headers (and any buttons in
+    // them) end up partly hidden under the status bar icons.
+    if (Capacitor.getPlatform() === 'android') {
+      StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+    }
 
     // Single reactive spot for push registration — covers cold start with a persisted
     // session, login, register and OAuth alike (all of them update currentUser$), and
