@@ -4,10 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Budget;
 use App\Entity\Department;
+use App\Entity\Notification;
 use App\Entity\User;
+use App\Entity\UserCompany;
 use App\Repository\BudgetRepository;
 use App\Repository\ExpenseRepository;
+use App\Repository\NotificationRepository;
+use App\Repository\UserCompanyRepository;
 use App\Security\Voter\CompanyVoter;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,6 +30,9 @@ class BudgetController extends AbstractController
         private readonly ExpenseRepository $expenseRepository,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
+        private readonly NotificationRepository $notificationRepository,
+        private readonly NotificationService $notificationService,
+        private readonly UserCompanyRepository $userCompanyRepository,
     ) {}
 
     // --- Company (department) budgets ---
@@ -150,13 +158,85 @@ class BudgetController extends AbstractController
             );
 
         $amount = (float) $budget->getAmount();
+        $percentage = $amount > 0 ? round(($spent / $amount) * 100, 1) : 0.0;
+
+        $this->notifyBudgetPaceIfAhead($budget, $percentage);
 
         return $this->json([
             'budget' => json_decode($this->serializer->serialize($budget, 'json', ['groups' => ['budget:read']])),
             'spent' => $spent,
             'remaining' => $amount - $spent,
-            'percentage' => $amount > 0 ? round(($spent / $amount) * 100, 1) : 0.0,
+            'percentage' => $percentage,
         ]);
+    }
+
+    /**
+     * Early-warning alert distinct from the 90%/100% "just crossed" alerts fired on expense
+     * create/approve (see ExpenseController) — this one catches overspending *pace* even
+     * without a new expense triggering it, e.g. having already burned 60% of the budget by
+     * the middle of the month. Checked opportunistically whenever consumption is viewed
+     * (this app has no cron/scheduler), so it fires the first time the budget page is opened
+     * on/after the day the pace condition becomes true, not necessarily on the exact day.
+     * Guarded against re-firing every page load by checking for a prior pace notification
+     * this month.
+     */
+    private function notifyBudgetPaceIfAhead(Budget $budget, float $percentage): void
+    {
+        if ($budget->getPeriod() !== Budget::PERIOD_MONTHLY) {
+            return;
+        }
+
+        $now = new \DateTime();
+        if ($budget->getYear() !== (int) $now->format('Y') || $budget->getMonth() !== (int) $now->format('n')) {
+            return;
+        }
+
+        $dayOfMonth = (int) $now->format('j');
+        $daysInMonth = (int) $now->format('t');
+        $timeElapsedPercentage = ($dayOfMonth / $daysInMonth) * 100;
+
+        // "Ahead of pace": already further into the budget than into the month, and past a
+        // floor so it doesn't fire on trivially small amounts on day 1.
+        if ($percentage < 60 || $percentage < $timeElapsedPercentage + 10) {
+            return;
+        }
+
+        $recipients = $budget->getUser()
+            ? [$budget->getUser()]
+            : array_map(
+                fn (UserCompany $membership) => $membership->getUser(),
+                $this->userCompanyRepository->findBy(['company' => $budget->getDepartment()->getCompany(), 'role' => UserCompany::ROLE_ADMIN])
+            );
+
+        foreach ($recipients as $recipient) {
+            $alreadyNotified = false;
+            foreach ($this->notificationRepository->findBy(['user' => $recipient, 'type' => Notification::TYPE_BUDGET_ALERT]) as $existing) {
+                $data = $existing->getData() ?? [];
+                if (($data['budgetId'] ?? null) === $budget->getId() && ($data['pace'] ?? false) === true
+                    && $existing->getCreatedAt() >= new \DateTime('first day of this month 00:00:00')) {
+                    $alreadyNotified = true;
+                    break;
+                }
+            }
+            if ($alreadyNotified) {
+                continue;
+            }
+
+            $label = $budget->getUser() ? 'Votre budget mensuel' : sprintf('Le budget du département "%s"', $budget->getDepartment()->getName());
+            $this->notificationService->notify(
+                $recipient,
+                Notification::TYPE_BUDGET_ALERT,
+                sprintf(
+                    '%s est déjà consommé à %.0f%% alors que le mois n\'est qu\'à %.0f%% — au rythme actuel, vous risquez de le dépasser avant la fin du mois.',
+                    $label,
+                    $percentage,
+                    $timeElapsedPercentage
+                ),
+                ['budgetId' => $budget->getId(), 'pace' => true],
+            );
+        }
+
+        $this->em->flush();
     }
 
     private function saveBudgetFromRequest(Budget $budget, Request $request): JsonResponse

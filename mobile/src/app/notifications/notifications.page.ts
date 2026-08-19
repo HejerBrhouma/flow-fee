@@ -28,6 +28,7 @@ export class NotificationsPage implements OnInit {
     budget_alert: 'warning-outline',
     team_invite: 'people-outline',
     savings_goal_reached: 'trophy-outline',
+    savings_goal_reminder: 'alarm-outline',
   };
 
   readonly colors: Record<NotificationType, string> = {
@@ -37,6 +38,7 @@ export class NotificationsPage implements OnInit {
     budget_alert: 'warning',
     team_invite: 'primary',
     savings_goal_reached: 'warning',
+    savings_goal_reminder: 'medium',
   };
 
   constructor(

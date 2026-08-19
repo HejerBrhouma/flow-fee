@@ -303,7 +303,8 @@ class ExpenseController extends AbstractController
         $spentAfter = $this->expenseRepository->getTotalByDepartmentAndPeriod(
             $department,
             $budget->getYear(),
-            $budget->getPeriod() === Budget::PERIOD_MONTHLY ? $budget->getMonth() : null
+            $budget->getPeriod() === Budget::PERIOD_MONTHLY ? $budget->getMonth() : null,
+            $budget->getCurrency()
         );
         $spentBefore = $spentAfter - (float) $expense->getAmount();
 
@@ -373,8 +374,8 @@ class ExpenseController extends AbstractController
         }
 
         $spentAfter = $budget->getPeriod() === Budget::PERIOD_MONTHLY
-            ? $this->expenseRepository->getTotalByUserAndPeriod($user, $budget->getYear(), $budget->getMonth())
-            : $this->expenseRepository->getTotalByUserAndYear($user, $budget->getYear());
+            ? $this->expenseRepository->getTotalByUserAndPeriod($user, $budget->getYear(), $budget->getMonth(), $budget->getCurrency())
+            : $this->expenseRepository->getTotalByUserAndYear($user, $budget->getYear(), $budget->getCurrency());
         $spentBefore = $spentAfter - (float) $expense->getAmount();
 
         $percentBefore = ($spentBefore / $amount) * 100;

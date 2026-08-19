@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { BudgetService } from '../../core/services/budget.service';
+import { AuthService } from '../../core/services/auth.service';
 import { BudgetConsumption } from '../../core/models/company.model';
 
 @Component({
@@ -25,6 +26,7 @@ export class BudgetsComponent implements OnInit {
 
   constructor(
     private budgetService: BudgetService,
+    public authService: AuthService,
     private fb: FormBuilder,
     private toastr: ToastrService,
   ) {
@@ -72,6 +74,7 @@ export class BudgetsComponent implements OnInit {
       year,
       month: period === 'monthly' ? month : undefined,
       amount,
+      currency: this.authService.currentUser?.preferredCurrency ?? 'EUR',
     }).subscribe({
       next: () => {
         this.showForm = false;

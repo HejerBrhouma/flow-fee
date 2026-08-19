@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SavingsGoalService } from '../../core/services/savings-goal.service';
+import { AuthService } from '../../core/services/auth.service';
 import { SavingsGoal } from '../../core/models/savings-goal.model';
 
 @Component({
@@ -21,6 +22,7 @@ export class SavingsGoalsComponent implements OnInit {
 
   constructor(
     private savingsGoalService: SavingsGoalService,
+    public authService: AuthService,
     private fb: FormBuilder,
     private toastr: ToastrService,
   ) {
@@ -54,7 +56,13 @@ export class SavingsGoalsComponent implements OnInit {
     if (this.form.invalid) return;
 
     const { name, targetAmount, targetDate, term } = this.form.value;
-    this.savingsGoalService.create({ name, targetAmount, targetDate: targetDate || undefined, term }).subscribe({
+    this.savingsGoalService.create({
+      name,
+      targetAmount,
+      targetDate: targetDate || undefined,
+      term,
+      currency: this.authService.currentUser?.preferredCurrency ?? 'EUR',
+    }).subscribe({
       next: (goal) => {
         this.goals.unshift(goal);
         this.form.reset();

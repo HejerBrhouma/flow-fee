@@ -8,6 +8,7 @@ import { ExpenseService } from '../../core/services/expense.service';
 import { NetworkService } from '../../core/services/network.service';
 import { OfflineQueueService } from '../../core/services/offline-queue.service';
 import { CategoryService } from '../../core/services/category.service';
+import { AuthService } from '../../core/services/auth.service';
 import { Expense, ExpenseCreatePayload } from '../../core/models/expense.model';
 import { Category } from '../../core/models/category.model';
 import { suggestCategory } from '../../core/utils/suggest-category';
@@ -38,6 +39,7 @@ export class ExpenseFormPage implements OnInit {
     private networkService: NetworkService,
     private offlineQueue: OfflineQueueService,
     private categoryService: CategoryService,
+    private authService: AuthService,
     private route: ActivatedRoute,
     private router: Router,
     private toastController: ToastController,
@@ -45,7 +47,7 @@ export class ExpenseFormPage implements OnInit {
     this.form = this.fb.group({
       title: ['', Validators.required],
       amount: ['', [Validators.required, Validators.min(0.01)]],
-      currency: ['EUR', Validators.required],
+      currency: [this.authService.currentUser?.preferredCurrency ?? 'EUR', Validators.required],
       expenseDate: [new Date().toISOString(), Validators.required],
       description: [''],
       categoryId: [null],

@@ -18,6 +18,7 @@ class Notification
     public const TYPE_BUDGET_ALERT = 'budget_alert';
     public const TYPE_TEAM_INVITE = 'team_invite';
     public const TYPE_SAVINGS_GOAL_REACHED = 'savings_goal_reached';
+    public const TYPE_SAVINGS_GOAL_REMINDER = 'savings_goal_reminder';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

@@ -9,6 +9,7 @@ import { BudgetConsumption } from '../core/models/budget.model';
 import { SavingsGoalService } from '../core/services/savings-goal.service';
 import { SavingsGoal } from '../core/models/savings-goal.model';
 import { CacheService } from '../core/services/cache.service';
+import { AuthService } from '../core/services/auth.service';
 
 const BUDGETS_CACHE_KEY = 'budget_tab_budgets';
 const GOALS_CACHE_KEY = 'budget_tab_goals';
@@ -55,6 +56,7 @@ export class BudgetTabPage implements OnInit {
     private fb: FormBuilder,
     private toastController: ToastController,
     private alertController: AlertController,
+    private authService: AuthService,
     private route: ActivatedRoute,
   ) {
     const now = new Date();
@@ -144,6 +146,7 @@ export class BudgetTabPage implements OnInit {
       year,
       month: period === 'monthly' ? month : undefined,
       amount,
+      currency: this.authService.currentUser?.preferredCurrency ?? 'EUR',
     }).subscribe({
       next: async () => {
         this.showForm = false;
@@ -217,7 +220,13 @@ export class BudgetTabPage implements OnInit {
     if (this.goalForm.invalid) return;
 
     const { name, targetAmount, targetDate, term } = this.goalForm.value;
-    this.savingsGoalService.create({ name, targetAmount, targetDate: targetDate || undefined, term }).subscribe({
+    this.savingsGoalService.create({
+      name,
+      targetAmount,
+      targetDate: targetDate || undefined,
+      term,
+      currency: this.authService.currentUser?.preferredCurrency ?? 'EUR',
+    }).subscribe({
       next: async (goal) => {
         this.goals.unshift(goal);
         this.goalForm.reset({ term: 'short' });

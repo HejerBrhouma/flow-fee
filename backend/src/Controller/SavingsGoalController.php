@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Notification;
 use App\Entity\SavingsGoal;
 use App\Entity\User;
+use App\Repository\NotificationRepository;
 use App\Repository\SavingsGoalRepository;
 use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,6 +26,7 @@ class SavingsGoalController extends AbstractController
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
         private readonly NotificationService $notificationService,
+        private readonly NotificationRepository $notificationRepository,
     ) {}
 
     #[Route('', name: 'list', methods: ['GET'])]
@@ -35,9 +37,52 @@ class SavingsGoalController extends AbstractController
 
         $goals = $this->savingsGoalRepository->findBy(['user' => $user], ['createdAt' => 'DESC']);
 
+        foreach ($goals as $goal) {
+            $this->notifyStaleGoalIfNeeded($goal);
+        }
+
         return $this->json(
             json_decode($this->serializer->serialize($goals, 'json', ['groups' => ['savings_goal:read']]))
         );
+    }
+
+    /**
+     * Short-term goals are meant to move fast — nudge the user if a month has gone by
+     * with no contribution at all, same rationale as the budget "pace" alert
+     * (BudgetController::notifyBudgetPaceIfAhead): checked opportunistically whenever the
+     * goals page is viewed rather than on a cron (this app has none), guarded against
+     * re-firing every page load by checking for a prior reminder in the last 30 days.
+     * Long-term goals are excluded — a month of inactivity on a house/car fund isn't
+     * meaningful the way it is for a short-term one.
+     */
+    private function notifyStaleGoalIfNeeded(SavingsGoal $goal): void
+    {
+        if ($goal->getTerm() !== SavingsGoal::TERM_SHORT) {
+            return;
+        }
+        if ((float) $goal->getCurrentAmount() >= (float) $goal->getTargetAmount()) {
+            return;
+        }
+
+        $staleSince = (new \DateTime())->modify('-30 days');
+        if ($goal->getUpdatedAt() === null || $goal->getUpdatedAt() > $staleSince) {
+            return;
+        }
+
+        foreach ($this->notificationRepository->findBy(['user' => $goal->getUser(), 'type' => Notification::TYPE_SAVINGS_GOAL_REMINDER]) as $existing) {
+            $data = $existing->getData() ?? [];
+            if (($data['savingsGoalId'] ?? null) === $goal->getId() && $existing->getCreatedAt() >= $staleSince) {
+                return;
+            }
+        }
+
+        $this->notificationService->notify(
+            $goal->getUser(),
+            Notification::TYPE_SAVINGS_GOAL_REMINDER,
+            sprintf('Aucune contribution à votre objectif "%s" depuis un mois — un petit geste pour ne pas perdre le rythme ?', $goal->getName()),
+            ['savingsGoalId' => $goal->getId()],
+        );
+        $this->em->flush();
     }
 
     #[Route('', name: 'create', methods: ['POST'])]

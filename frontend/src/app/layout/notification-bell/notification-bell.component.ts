@@ -10,7 +10,7 @@ import { Notification, NotificationType } from '../../core/models/notification.m
 dayjs.extend(relativeTime);
 dayjs.locale('fr');
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 3_000;
 
 @Component({
   selector: 'app-notification-bell',
@@ -29,6 +29,7 @@ export class NotificationBellComponent implements OnInit, OnDestroy {
     budget_alert: '⚠️',
     team_invite: '👥',
     savings_goal_reached: '🎯',
+    savings_goal_reminder: '⏰',
   };
 
   private destroy$ = new Subject<void>();

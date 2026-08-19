@@ -26,6 +26,7 @@ export class NotificationsComponent implements OnInit {
     budget_alert: '⚠️',
     team_invite: '👥',
     savings_goal_reached: '🎯',
+    savings_goal_reminder: '⏰',
   };
 
   constructor(
@@ -93,7 +94,7 @@ export class NotificationsComponent implements OnInit {
 
     if (data?.expenseId) {
       this.router.navigate(['/expenses', data.expenseId]);
-    } else if (notification.type === 'savings_goal_reached') {
+    } else if (notification.type === 'savings_goal_reached' || notification.type === 'savings_goal_reminder') {
       this.router.navigateByUrl('/savings-goals');
     } else if (notification.type === 'budget_alert') {
       this.router.navigateByUrl('/budgets');

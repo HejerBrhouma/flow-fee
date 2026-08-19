@@ -11,3 +11,11 @@ body {
   background-color: #f9fafb;
   color: #111827;
 }
+
+/* Native date/time picker icons render black by default (WebKit/Chromium), invisible
+   against a dark input background — invert them whenever dark mode is active. */
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.dark input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

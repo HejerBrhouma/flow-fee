@@ -4,7 +4,8 @@ export type NotificationType =
   | 'expense_rejected'
   | 'budget_alert'
   | 'team_invite'
-  | 'savings_goal_reached';
+  | 'savings_goal_reached'
+  | 'savings_goal_reminder';
 
 export interface Notification {
   id: number;

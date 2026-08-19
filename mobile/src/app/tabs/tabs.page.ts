@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { interval } from 'rxjs';
 import { NotificationService } from '../core/services/notification.service';
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 3_000;
 
 @Component({
   selector: 'app-tabs',
