@@ -32,9 +32,18 @@ class Category
     #[Groups(['category:read', 'expense:read'])]
     private ?string $color = null;
 
-    // null = global category, set = company-specific
+    // null = global category, set = company-specific (shared with the whole team)
     #[ORM\ManyToOne]
     private ?Company $company = null;
+
+    // Personal category, only visible to and editable by this one user (e.g. a particulier
+    // account's own custom category). Mutually exclusive with $company in practice — a
+    // category is either global, company-wide, or one person's own, never more than one.
+    // Deliberately not in a serialization group — the API exposes ownership via a computed
+    // "editable" flag (see CategoryController) instead of the raw user relation, to avoid
+    // leaking other users' account data through a shared list endpoint.
+    #[ORM\ManyToOne]
+    private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'category', targetEntity: Expense::class)]
     private Collection $expenses;
@@ -53,5 +62,7 @@ class Category
     public function setColor(?string $color): static { $this->color = $color; return $this; }
     public function getCompany(): ?Company { return $this->company; }
     public function setCompany(?Company $company): static { $this->company = $company; return $this; }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
     public function getExpenses(): Collection { return $this->expenses; }
 }

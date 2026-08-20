@@ -43,7 +43,7 @@ export class ExpenseFormComponent implements OnInit {
       currency: [this.authService.currentUser?.preferredCurrency ?? 'EUR', Validators.required],
       expenseDate: ['', Validators.required],
       description: [''],
-      categoryId: [null],
+      categoryId: [null, Validators.required],
       departmentId: [null],
     });
 

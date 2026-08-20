@@ -48,6 +48,10 @@ const routes: Routes = [
         loadChildren: () => import('./features/notifications/notifications.module').then(m => m.NotificationsModule),
       },
       {
+        path: 'categories',
+        loadChildren: () => import('./features/categories/categories.module').then(m => m.CategoriesModule),
+      },
+      {
         path: 'profile',
         loadChildren: () => import('./features/profile/profile.module').then(m => m.ProfileModule),
       },

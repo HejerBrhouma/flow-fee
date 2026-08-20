@@ -47,23 +47,23 @@
         <div class="space-y-2">
           <div class="flex justify-between">
             <span class="text-gray-500 text-sm dark:text-gray-400">Type de compte</span>
-            <span class="font-medium text-sm capitalize">
+            <span class="font-medium text-sm capitalize text-gray-800 dark:text-gray-100">
               {{ user.type === 'personal' ? 'Particulier' : 'Professionnel' }}
             </span>
           </div>
           @if (user.phone) {
             <div class="flex justify-between">
               <span class="text-gray-500 text-sm dark:text-gray-400">Téléphone</span>
-              <span class="font-medium text-sm">{{ user.phone }}</span>
+              <span class="font-medium text-sm text-gray-800 dark:text-gray-100">{{ user.phone }}</span>
             </div>
           }
           <div class="flex justify-between">
             <span class="text-gray-500 text-sm dark:text-gray-400">Devise préférée</span>
-            <span class="font-medium text-sm">{{ user.preferredCurrency ?? 'EUR' }}</span>
+            <span class="font-medium text-sm text-gray-800 dark:text-gray-100">{{ user.preferredCurrency ?? 'EUR' }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-500 text-sm dark:text-gray-400">Membre depuis</span>
-            <span class="font-medium text-sm">{{ user.createdAt | date:'MMMM yyyy':'':'fr' }}</span>
+            <span class="font-medium text-sm text-gray-800 dark:text-gray-100">{{ user.createdAt | date:'MMMM yyyy':'':'fr' }}</span>
           </div>
         </div>
 

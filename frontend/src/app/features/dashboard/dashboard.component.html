@@ -60,6 +60,85 @@
       </div>
     </div>
 
+    <!-- Budget pace + savings goals -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+      @if (stats.monthlyBudget; as budget) {
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <h3 class="text-base font-semibold text-gray-700 dark:text-gray-200">Rythme du budget</h3>
+              <p class="text-xs text-gray-400 mt-0.5 dark:text-gray-500">
+                {{ budget.spent | number:'1.0-0' }} / {{ budget.amount | number:'1.0-0' }} {{ budget.currency }} dépensés ce mois-ci
+              </p>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap"
+              [ngClass]="{
+                'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10': budgetPaceStatus() === 'on-track',
+                'bg-amber-50 text-amber-600 dark:bg-amber-500/10': budgetPaceStatus() === 'at-risk',
+                'bg-red-50 text-red-600 dark:bg-red-500/10': budgetPaceStatus() === 'over'
+              }">
+              {{ budgetPaceStatus() === 'on-track' ? 'Dans les temps' : budgetPaceStatus() === 'at-risk' ? 'En avance sur le rythme' : 'Budget dépassé' }}
+            </span>
+          </div>
+
+          <div class="relative pt-3">
+            @if (budget.timeElapsedPercentage !== null) {
+              <div class="absolute top-0 flex flex-col items-center -translate-x-1/2"
+                [style.left.%]="budget.timeElapsedPercentage > 100 ? 100 : budget.timeElapsedPercentage">
+                <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500 whitespace-nowrap">aujourd'hui</span>
+                <span class="block w-px h-2 bg-gray-300 dark:bg-gray-600"></span>
+              </div>
+            }
+            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden dark:bg-gray-700">
+              <div class="h-2.5 rounded-full transition-all"
+                [class.bg-emerald-500]="budgetPaceStatus() === 'on-track'"
+                [class.bg-amber-500]="budgetPaceStatus() === 'at-risk'"
+                [class.bg-red-500]="budgetPaceStatus() === 'over'"
+                [style.width.%]="budget.percentage > 100 ? 100 : budget.percentage"></div>
+            </div>
+          </div>
+
+          <div class="flex justify-between text-xs text-gray-400 mt-2 dark:text-gray-500">
+            <span>{{ budget.percentage | number:'1.0-1' }}% du budget</span>
+            @if (budget.timeElapsedPercentage !== null) {
+              <span>{{ budget.timeElapsedPercentage | number:'1.0-1' }}% du mois écoulé</span>
+            }
+          </div>
+        </div>
+      }
+
+      @if (stats.savingsGoals.length > 0) {
+        <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 dark:bg-gray-800 dark:border-gray-700"
+          [class.lg:col-span-3]="!stats.monthlyBudget">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-gray-700 dark:text-gray-200">Objectifs d'épargne</h3>
+            <a routerLink="/savings-goals" class="text-xs font-medium text-indigo-600 hover:underline">Tout voir</a>
+          </div>
+
+          <div class="space-y-4" [class.lg:grid]="!stats.monthlyBudget" [class.lg:grid-cols-2]="!stats.monthlyBudget" [class.lg:gap-x-6]="!stats.monthlyBudget" [class.lg:space-y-0]="!stats.monthlyBudget">
+            @for (goal of stats.savingsGoals; track trackGoal($index, goal)) {
+              <div>
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="text-sm font-medium text-gray-700 truncate dark:text-gray-200">{{ goal.name }}</span>
+                  <span class="text-xs text-gray-400 shrink-0 ml-2 dark:text-gray-500">{{ goal.percentage | number:'1.0-0' }}%</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden dark:bg-gray-700">
+                  <div class="h-1.5 rounded-full bg-indigo-500 transition-all" [style.width.%]="goal.percentage > 100 ? 100 : goal.percentage"></div>
+                </div>
+                <div class="flex justify-between text-[11px] text-gray-400 mt-1 dark:text-gray-500">
+                  <span>{{ goal.currentAmount | number:'1.0-0' }} / {{ goal.targetAmount | number:'1.0-0' }} {{ goal.currency }}</span>
+                  @if (daysRemaining(goal.targetDate); as days) {
+                    <span [class.text-red-500]="days < 30">{{ days > 0 ? days + ' j restants' : 'Échéance dépassée' }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
     <!-- Charts -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 

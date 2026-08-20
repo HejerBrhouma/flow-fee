@@ -30,8 +30,8 @@
         } @else {
           @for (notification of notifications; track notification.id) {
             <button (click)="select(notification)" type="button"
-              class="w-full flex items-start gap-3 px-4 py-3 text-left border-b border-gray-50 last:border-0 hover:bg-gray-50 transition dark:hover:bg-gray-700"
-              [class.bg-indigo-50]="!notification.isRead">
+              class="w-full flex items-start gap-3 px-4 py-3 text-left border-b border-gray-50 last:border-0 hover:bg-gray-50 transition dark:border-gray-700 dark:hover:bg-gray-700"
+              [ngClass]="{ 'bg-indigo-50 dark:bg-indigo-500/10': !notification.isRead }">
               <span class="text-lg shrink-0">{{ icons[notification.type] }}</span>
               <span class="flex-1 min-w-0">
                 <span class="block text-sm text-gray-700 dark:text-gray-200" [class.font-semibold]="!notification.isRead">

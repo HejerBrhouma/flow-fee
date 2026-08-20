@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ChartData, ChartOptions } from 'chart.js';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { AuthService } from '../../core/services/auth.service';
-import { DashboardStats } from '../../core/models/company.model';
+import { DashboardGoalSummary, DashboardStats } from '../../core/models/company.model';
+
+export type BudgetPaceStatus = 'on-track' | 'at-risk' | 'over';
 
 @Component({
   selector: 'app-dashboard',
@@ -46,6 +48,26 @@ export class DashboardComponent implements OnInit {
         this.error = true;
       },
     });
+  }
+
+  // Same "ahead of pace" rule as the backend alert (BudgetController::notifyBudgetPaceIfAhead)
+  // — kept in sync deliberately, since this drives the widget's status badge.
+  budgetPaceStatus(): BudgetPaceStatus {
+    const budget = this.stats?.monthlyBudget;
+    if (!budget) return 'on-track';
+    if (budget.percentage >= 100) return 'over';
+    if (budget.timeElapsedPercentage !== null && budget.percentage >= budget.timeElapsedPercentage + 10) return 'at-risk';
+    return 'on-track';
+  }
+
+  daysRemaining(targetDate: string | null): number | null {
+    if (!targetDate) return null;
+    const diffMs = new Date(targetDate).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0);
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  }
+
+  trackGoal(_index: number, goal: DashboardGoalSummary): number {
+    return goal.id;
   }
 
   private buildCharts(stats: DashboardStats): void {

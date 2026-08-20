@@ -1,0 +1,98 @@
+<div class="p-6 max-w-3xl mx-auto">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Catégories</h2>
+      <p class="text-sm text-gray-500 mt-1 dark:text-gray-400">
+        Les catégories globales sont communes à tous les comptes. Vos catégories personnelles ne sont visibles que par vous.
+      </p>
+    </div>
+    @if (!showForm) {
+      <button (click)="startCreate()" type="button"
+        class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition shrink-0 ml-4">
+        + Nouvelle catégorie
+      </button>
+    }
+  </div>
+
+  @if (showForm) {
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-5 mb-6 dark:bg-indigo-500/10 dark:border-indigo-500/30">
+      <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-[80px_1fr] gap-3">
+          <input formControlName="icon" type="text" maxlength="4" placeholder="🏷️"
+            class="w-full text-center text-xl border border-indigo-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-indigo-500/30 dark:bg-gray-800 dark:text-gray-100">
+          <input formControlName="name" type="text" placeholder="Nom de la catégorie"
+            class="w-full border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-indigo-500/30 dark:bg-gray-800 dark:text-gray-100">
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-500 mb-2 dark:text-gray-400">Couleur</p>
+          <div class="flex gap-2">
+            @for (preset of colorPresets; track preset) {
+              <button type="button" (click)="form.patchValue({ color: preset })"
+                class="w-7 h-7 rounded-full transition ring-offset-2 dark:ring-offset-gray-900"
+                [ngClass]="{ 'ring-2 ring-gray-400': form.value.color === preset }"
+                [style.background-color]="preset">
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" [disabled]="form.invalid || saving"
+            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition disabled:opacity-50">
+            {{ saving ? 'Enregistrement...' : (editingId ? 'Enregistrer' : 'Créer') }}
+          </button>
+          <button type="button" (click)="cancel()"
+            class="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (loading) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="bg-white rounded-xl border border-gray-100 p-4 dark:bg-gray-800 dark:border-gray-700">
+          <app-skeleton-block width="60%" height="1rem"></app-skeleton-block>
+        </div>
+      }
+    </div>
+  }
+
+  @if (error) {
+    <app-error-state message="Impossible de charger les catégories." (retry)="load()"></app-error-state>
+  }
+
+  @if (!loading && !error) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      @for (category of categories; track category.id) {
+        <div class="flex items-center gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3 dark:bg-gray-800 dark:border-gray-700">
+          <span class="w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0"
+            [style.background-color]="(category.color ?? '#94a3b8') + '20'">
+            {{ category.icon ?? '🏷️' }}
+          </span>
+          <span class="flex-1 min-w-0 text-sm font-medium text-gray-700 truncate dark:text-gray-200">
+            {{ category.name }}
+          </span>
+          @if (category.editable) {
+            <button (click)="startEdit(category)" title="Modifier"
+              class="text-gray-300 hover:text-indigo-500 transition shrink-0 dark:text-gray-600">
+              ✎
+            </button>
+            <button (click)="remove(category)" title="Supprimer"
+              class="text-gray-300 hover:text-red-500 transition shrink-0 dark:text-gray-600">
+              ✕
+            </button>
+          } @else {
+            <span class="text-[10px] font-medium text-gray-400 uppercase tracking-wide shrink-0 dark:text-gray-500">
+              Globale
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

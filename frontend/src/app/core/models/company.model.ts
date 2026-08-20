@@ -66,6 +66,25 @@ export interface BudgetConsumption {
   percentage: number;
 }
 
+export interface DashboardBudgetPace {
+  amount: number;
+  spent: number;
+  currency: string;
+  percentage: number;
+  timeElapsedPercentage: number | null;
+}
+
+export interface DashboardGoalSummary {
+  id: number;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  currency: string;
+  term: 'short' | 'long';
+  targetDate: string | null;
+  percentage: number;
+}
+
 export interface DashboardStats {
   currency: string;
   monthlyTotal: number;
@@ -73,4 +92,6 @@ export interface DashboardStats {
   pendingCount: number;
   monthlyByCategory: { name: string; color: string; icon: string; total: number }[];
   monthlyTrend: { month: number; total: number }[];
+  monthlyBudget: DashboardBudgetPace | null;
+  savingsGoals: DashboardGoalSummary[];
 }

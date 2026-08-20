@@ -116,14 +116,24 @@ class ExpenseController extends AbstractController
             $expense->setExpenseDate(new \DateTime($data['expenseDate']));
         }
 
-        if (!empty($data['categoryId'])) {
-            $category = $this->categoryRepository->find($data['categoryId']);
-            $expense->setCategory($category);
+        $category = !empty($data['categoryId']) ? $this->categoryRepository->find($data['categoryId']) : null;
+        if (!$category) {
+            return $this->json(['errors' => ['categoryId' => 'La catégorie est obligatoire.']], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+        $expense->setCategory($category);
 
         if (!empty($data['departmentId'])) {
             $department = $this->departmentRepository->find($data['departmentId']);
             $expense->setDepartment($department);
+        }
+
+        // Draft → submitted → approved/rejected is a review workflow for company expenses
+        // (a manager has to act on it). A personal expense has no manager to submit to, so
+        // leaving it in "draft" forever isn't a transient state waiting on an action — it's a
+        // dead end (see isLocked(): drafts are only ever unlocked by department expenses
+        // moving through review). Personal expenses are approved immediately instead.
+        if (!$expense->getDepartment()) {
+            $expense->setStatus(Expense::STATUS_APPROVED);
         }
 
         $errors = $this->validator->validate($expense);
