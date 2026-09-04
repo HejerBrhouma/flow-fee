@@ -2,7 +2,7 @@
 // separate hosted production backend yet, so this points at the same local Docker backend
 // as environment.ts — update DEV_MACHINE_LAN_IP if the dev machine's IP changes (check via
 // `ipconfig getifaddr en0` on macOS).
-const DEV_MACHINE_LAN_IP = '192.168.100.61';
+const DEV_MACHINE_LAN_IP = 'YOUR_DEV_MACHINE_LAN_IP'; // e.g. 192.168.1.42
 
 export const environment = {
   production: true,

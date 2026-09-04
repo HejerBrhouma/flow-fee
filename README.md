@@ -23,15 +23,15 @@ docker compose up
 
 Au premier lancement, le conteneur `backend` installe automatiquement les dépendances Composer, génère les clés JWT, crée la base de données et applique les migrations. Cela peut prendre une à deux minutes la première fois.
 
-Une fois les conteneurs démarrés :
+Une fois les conteneurs démarrés, les services sont accessibles sur `localhost` aux ports définis dans `docker-compose.yml` :
 
-| Service | URL | Description |
-|---|---|---|
-| Frontend web | http://localhost:4200 | Application Angular |
-| App mobile (preview navigateur) | http://localhost:8100 | Même app en Ionic, voir [Application mobile](#application-mobile) |
-| API backend | http://localhost:8001/api | API Symfony |
-| phpMyAdmin | http://localhost:8082 | Interface d'administration MySQL |
-| MySQL | `localhost:3307` | Base de données (accès direct, ex. client SQL) |
+| Service | Description |
+|---|---|
+| Frontend web | Application Angular |
+| App mobile (preview navigateur) | Même app en Ionic, voir [Application mobile](#application-mobile) |
+| API backend | API Symfony (préfixe `/api`) |
+| phpMyAdmin | Interface d'administration MySQL |
+| MySQL | Base de données (accès direct, ex. client SQL) |
 
 ### Charger les données de démonstration
 
@@ -58,14 +58,14 @@ Les variables d'environnement du backend (base de données, secrets, clés JWT) 
 
 Deux fonctionnalités nécessitent des identifiants externes réels pour fonctionner (les boutons existent mais échoueront sans clés valides) :
 
-- **Connexion Google/Facebook** : renseigner `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` et `FACEBOOK_CLIENT_ID`/`FACEBOOK_CLIENT_SECRET` dans `backend/.env.local`. Le flux est déjà câblé côté web (popup + `postMessage`) et côté mobile (navigateur système + deep link `com.flowfee.app://oauth-callback`) ; il ne manque que des identifiants OAuth réels. Dans la console Google Cloud / Meta for Developers, déclarer ces 4 URIs de redirection autorisées :
-  - `http://localhost:8001/api/auth/oauth/google/check` (web)
-  - `http://localhost:8001/api/auth/oauth/facebook/check` (web)
-  - `http://<host-backend>:8001/api/auth/oauth/mobile/google/check` (mobile)
-  - `http://<host-backend>:8001/api/auth/oauth/mobile/facebook/check` (mobile)
+- **Connexion Google/Facebook** : renseigner `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` et `FACEBOOK_CLIENT_ID`/`FACEBOOK_CLIENT_SECRET` dans `backend/.env.local`. Le flux est déjà câblé côté web (popup + `postMessage`) et côté mobile (navigateur système + deep link `com.flowfee.app://oauth-callback`) ; il ne manque que des identifiants OAuth réels. Dans la console Google Cloud / Meta for Developers, déclarer ces 4 URIs de redirection autorisées (remplacer `<host-backend>` et `<port-backend>` par l'adresse et le port réels du service `backend`, voir `docker-compose.yml`) :
+  - `http://localhost:<port-backend>/api/auth/oauth/google/check` (web)
+  - `http://localhost:<port-backend>/api/auth/oauth/facebook/check` (web)
+  - `http://<host-backend>:<port-backend>/api/auth/oauth/mobile/google/check` (mobile)
+  - `http://<host-backend>:<port-backend>/api/auth/oauth/mobile/facebook/check` (mobile)
 
   Sur mobile, l'app doit être compilée (Xcode/Android Studio) pour que le schéma d'URL personnalisé `com.flowfee.app://` soit intercepté par l'OS (déjà déclaré dans `Info.plist` et `AndroidManifest.xml`) — en test via `ionic serve`/Safari mobile sans build natif, le retour de l'OAuth échouera après authentification.
-- **Envoi d'emails** : `MAILER_DSN` pointe par défaut vers un serveur SMTP local factice (`localhost:1025`, ex. Mailhog) — à adapter si besoin.
+- **Envoi d'emails** : `MAILER_DSN` pointe par défaut vers un serveur SMTP local factice (ex. Mailhog) — à adapter si besoin.
 
 **Conversion de devises** : les dépenses, budgets et objectifs d'épargne peuvent chacun avoir leur propre devise (EUR, USD, GBP, TND). Pour que les totaux (tableau de bord, consommation de budget) restent cohérents, `App\Service\CurrencyConverter` convertit tout dans une devise commune avant de sommer, en utilisant les taux de change en temps réel de [open.er-api.com](https://www.exchangerate-api.com/docs/free) — une API gratuite, sans clé requise. Les taux sont mis en cache 12h ; si l'API est injoignable, un repli sur des taux approximatifs statiques (codés dans le service) est utilisé automatiquement.
 
@@ -83,7 +83,7 @@ Pour activer les push (Android) :
    ```
 4. Redémarrer le conteneur `backend` (`docker compose restart backend`) pour que la config soit prise en compte.
 
-**Build natif Android requis pour tester réellement** : les push nécessitent un vrai token FCM, obtenu uniquement via `npx cap run android` (émulateur avec image système **Google Play**, ou appareil physique) — le mode navigateur (`http://localhost:8100`) n'a pas de fallback push. Deux réglages natifs déjà en place dans `mobile/android/` sont nécessaires pour que l'app puisse effectivement parler au backend en HTTP local :
+**Build natif Android requis pour tester réellement** : les push nécessitent un vrai token FCM, obtenu uniquement via `npx cap run android` (émulateur avec image système **Google Play**, ou appareil physique) — le mode navigateur (preview web du service `mobile`) n'a pas de fallback push. Deux réglages natifs déjà en place dans `mobile/android/` sont nécessaires pour que l'app puisse effectivement parler au backend en HTTP local :
 - `android/app/src/main/res/xml/network_security_config.xml` autorise le trafic HTTP en clair vers l'IP LAN de dev (Android bloque le HTTP par défaut depuis l'API 28).
 - `capacitor.config.ts` force `server.androidScheme: 'http'`, sinon le WebView (servi en `https://localhost` par défaut) bloque les appels HTTP vers l'API comme "contenu mixte".
 
@@ -103,12 +103,12 @@ Fonctionnalités spécifiques au mobile :
 
 ### Tester dans le navigateur (déjà lancé avec `docker compose up`)
 
-L'app tourne sur http://localhost:8100. Les plugins Capacitor (caméra, stockage) ont un fallback web automatique (sélecteur de fichier natif du navigateur à la place de la caméra native).
+L'app tourne sur `localhost`, au port du service `mobile` défini dans `docker-compose.yml`. Les plugins Capacitor (caméra, stockage) ont un fallback web automatique (sélecteur de fichier natif du navigateur à la place de la caméra native).
 
 **Pour tester depuis un téléphone**, connecté au même réseau Wi-Fi que la machine qui fait tourner Docker :
 
 ```
-http://<IP_LAN_DE_VOTRE_MACHINE>:8100
+http://<IP_LAN_DE_VOTRE_MACHINE>:<port-mobile>
 ```
 
 Trouver son IP LAN : `ipconfig getifaddr en0` (Mac) ou `ipconfig` (Windows, chercher "Adresse IPv4").
@@ -128,7 +128,7 @@ npx cap open ios     # ouvre le projet dans Xcode (nécessite `pod install` au p
 
 Depuis Android Studio / Xcode, lancer sur un simulateur/émulateur ou un appareil physique connecté (USB debugging activé côté Android).
 
-**Live-reload sur device pendant le développement** : pointer `capacitor.config.ts` (`server.url`) vers l'IP LAN de la machine de dev (`http://<IP_LAN>:8100`), puis `npx cap sync`.
+**Live-reload sur device pendant le développement** : pointer `capacitor.config.ts` (`server.url`) vers l'IP LAN de la machine de dev (`http://<IP_LAN>:<port-mobile>`), puis `npx cap sync`.
 
 ### Notes avant publication sur les stores
 

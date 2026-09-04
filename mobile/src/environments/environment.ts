@@ -10,7 +10,7 @@ import { Capacitor } from '@capacitor/core';
 // Mac's current LAN IP for native builds instead; update it if the IP changes (check via
 // `ipconfig getifaddr en0` on macOS). Browser/LAN-via-URL testing (`ionic serve`) still
 // auto-detects via window.location.hostname, so this only matters for Xcode/Android Studio builds.
-const DEV_MACHINE_LAN_IP = '192.168.100.61';
+const DEV_MACHINE_LAN_IP = 'YOUR_DEV_MACHINE_LAN_IP'; // e.g. 192.168.1.42
 
 const apiHost = Capacitor.isNativePlatform()
   ? DEV_MACHINE_LAN_IP
